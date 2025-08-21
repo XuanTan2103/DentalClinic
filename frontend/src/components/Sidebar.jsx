@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import styles from './Sidebar.module.css';
-import { Home, Users, BarChart3, Settings, FileText, Mail, ChevronLeft, ChevronRight, LogOut, User } from "lucide-react"
+import { Home, Users, BarChart3, Settings, FileText, Mail, ChevronLeft, ChevronRight, LogOut, User, ScrollText } from "lucide-react"
 
 function Sidebar() {
     const [collapsed, setCollapsed] = useState(false);
@@ -13,8 +13,8 @@ function Sidebar() {
     
     const menuItems = [
         { icon: BarChart3, label: "Dashboard", href: "/dashboard" },
-        { icon: Home, label: "Thống kê", href: "/analytics" },
         { icon: Users, label: "Accounts", href: "/accounts" },
+        { icon: ScrollText, label: "Services", href: "/manage-service" },
         { icon: FileText, label: "Báo cáo", href: "/reports" },
         { icon: Mail, label: "Tin nhắn", href: "/messages" },
         { icon: Settings, label: "Cài đặt", href: "/settings" },
