@@ -11,7 +11,6 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-
 const userController = {
     register: async (req, res) => {
         try {

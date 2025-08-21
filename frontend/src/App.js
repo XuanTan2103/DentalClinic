@@ -5,6 +5,7 @@ import Regiter from './auth/Register';
 import HomePage from './pages/HomePage';
 import Dashboard from './pages/Dashboard';
 import Account from './pages/Account';
+import ManageService from './pages/ManageService';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/accounts" element={<Account />} />
+          <Route path="/manage-service" element={<ManageService />} />
         </Routes>
       </div>
     </Router>
