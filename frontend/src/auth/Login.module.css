@@ -190,3 +190,18 @@
 }
 
 
+/* Ẩn icon mắt mặc định của trình duyệt cho input password */
+:global(input[type="password"]::-ms-reveal),
+:global(input[type="password"]::-ms-clear) {
+  display: none;
+}
+
+:global(input[type="password"]::-webkit-credentials-auto-fill-button),
+:global(input[type="password"]::-webkit-contacts-auto-fill-button),
+:global(input[type="password"]::-webkit-textfield-decoration-container) {
+  display: none !important;
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}

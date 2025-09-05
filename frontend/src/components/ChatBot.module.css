@@ -1,13 +1,13 @@
 .chatBotContainer {
     position: fixed;
-    bottom: 115px;
+    bottom: 110px;
     right: 50px;
     z-index: 1000;
 }
 
 .chatBotButton {
-    width: 50px;
-    height: 50px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     background-color: rgb(255, 0, 153);
     border: none;
@@ -62,9 +62,9 @@
 }
 
 .chatWindow {
-    position: absolute;
-    bottom: 0;
-    right: 0;
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
     width: 350px;
     height: 500px;
     background-color: white;

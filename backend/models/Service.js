@@ -6,7 +6,7 @@ const serviceSchema = new Schema({
   description: { type: String, required: true },
   duration:    { type: Number, required: true },
   price:       { type: Number, required: true },
-  type: { type: String, required: true },
+  type: { type: String, enum: ['Check-up', 'Treatment', 'Aesthetics', 'Surgery', 'Orthodontics'], required: true },
   guarantee: { type: String, required: true },
   image: { type: String, required: true }
 }, { timestamps: true });

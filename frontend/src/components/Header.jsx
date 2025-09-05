@@ -34,7 +34,7 @@ function Header() {
             <div className={styles.headerContainer}>
                 <div className={styles.headerContent}>
                     <div className={styles.logoContainer}>
-                        <span className={`${styles.logo} ${isSticky ? styles.logoSticky : styles.logoNormal}`}>Gentle Care Dental</span>
+                        <span className={`${styles.logo} ${isSticky ? styles.logoSticky : styles.logoNormal}`} onClick={() => navigate('/home')}>Gentle Care Dental</span>
                     </div>
                     <nav className={styles.nav}>
                         <a href={'/about'} className={`${styles.navItem} ${isSticky ? styles.navItemSticky : styles.navItemNormal}`}>About</a>
@@ -48,7 +48,7 @@ function Header() {
                         </div>
                         <button className={`${styles.ctaButton} ${isSticky ? styles.ctaButtonSticky : styles.ctaButtonNormal}`}>Book Now</button>
                         {isLogin ? (
-                            <div className={styles.userInfo}>
+                            <div className={styles.userInfo} onClick={() => navigate('/profile')}>
                                 <span className={styles.userGreeting}>Hello, {user.fullName}</span>
                                 <UserOutlined className={styles.userIcon} />
                             </div>
