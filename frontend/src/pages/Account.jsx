@@ -1,78 +1,149 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "./Account.module.css";
 import Sidebar from "../components/Sidebar";
+import axios from "axios";
+import { notification } from 'antd';
+import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import { LockKeyhole, KeyRound } from 'lucide-react';
+import ConfirmDelete from "../components/ConfirmDelete";
+import CreateUser from "./CreateUser";
 
-const mockUsers = [
-    {
-        id: 1,
-        name: "Nguyễn Văn An",
-        email: "an.nguyen@email.com",
-        phone: "0901234567",
-        role: "Admin",
-        status: "active",
-        createdAt: "15/1/2024",
-        avatar: "N",
-    },
-    {
-        id: 2,
-        name: "Trần Thị Bình",
-        email: "binh.tran@email.com",
-        phone: "0902345678",
-        role: "User",
-        status: "active",
-        createdAt: "16/1/2024",
-        avatar: "T",
-    },
-    {
-        id: 3,
-        name: "Lê Văn Cường",
-        email: "cuong.le@email.com",
-        phone: "0903456789",
-        role: "Moderator",
-        status: "inactive",
-        createdAt: "17/1/2024",
-        avatar: "L",
-    },
-]
 
 function Account() {
-    const [users, setUsers] = useState(mockUsers)
+    const [users, setUsers] = useState([])
     const [searchTerm, setSearchTerm] = useState("")
     const [activeDropdown, setActiveDropdown] = useState(null)
+    const [filterRole, setFilterRole] = useState("")
+    const dropdownRef = useRef(null);
+    const [api, contextHolder] = notification.useNotification();
+    const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
 
-    const activeUsers = users.filter((user) => user.status === "active").length
-    const inactiveUsers = users.filter((user) => user.status === "inactive").length
+    const filteredUsers = users.filter((user) => {
+        const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesType = filterRole ? user.role === filterRole : true;
+        return matchesSearch && matchesType;
+    })
 
-    const filteredUsers = users.filter(
-        (user) =>
-            user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
+    const openNotification = (type, detailMessage = "") => {
+        if (type === "success") {
+            api.open({
+                message: "Action successful!",
+                description: detailMessage,
+                showProgress: true,
+                pauseOnHover: true,
+                icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+            });
+        } else {
+            api.open({
+                message: "Action failed!",
+                description: detailMessage,
+                showProgress: true,
+                pauseOnHover: true,
+                icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
+            });
+        }
+    };
 
-    const handleStatusToggle = (userId) => {
-        setUsers(
-            users.map((user) =>
-                user.id === userId ? { ...user, status: user.status === "active" ? "inactive" : "active" } : user,
-            ),
-        )
-        setActiveDropdown(null)
+    useEffect(() => {
+        fetchUsers()
+    }, [])
+
+    const fetchUsers = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get("http://localhost:5000/user/all-users",
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                }
+            )
+            setUsers(res.data.users)
+        } catch (err) {
+            console.error("Error fetching user:", err)
+        }
     }
 
-    const handleDelete = (userId) => {
-        setUsers(users.filter((user) => user.id !== userId))
-        setActiveDropdown(null)
+    const handleDelete = async (userId) => {
+        const token = localStorage.getItem('token');
+        try {
+            await axios.delete(`http://localhost:5000/user/delete-user/${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setUsers(users.filter(user => user._id !== userId));
+            openNotification("success", "User deleted successfully");
+        } catch (error) {
+            console.error("Error deleting user:", error);
+            if (error.response && error.response.data) {
+                if (error.response && error.response.data.errors.length > 0) {
+                    openNotification("error", error.response.data.errors[0].msg);
+                } else if (error.response.data.message) {
+                    openNotification("error", error.response.data.message);
+                } else {
+                    openNotification("error", "Failed to delete user!");
+                }
+            } else {
+                openNotification("error", "Failed to delete user!");
+            }
+        }
     }
+
+    const handleStatusToggle = async (userId) => {
+        const token = localStorage.getItem('token');
+        try {
+            const res = await axios.patch(`http://localhost:5000/user/toggle-status/${userId}`, {}, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const updatedUser = res.data.user;
+            setUsers(users.map(user => user._id === updatedUser._id ? updatedUser : user));
+            fetchUsers();
+            openNotification("success", `User status updated to ${updatedUser.isActive ? "Active" : "Inactive"}`);
+        } catch (error) {
+            console.error("Error toggling user status:", error);
+            if (error.response && error.response.data) {
+                if (error.response && error.response.data.errors.length > 0) {
+                    openNotification("error", error.response.data.errors[0].msg);
+                } else if (error.response.data.message) {
+                    openNotification("error", error.response.data.message);
+                } else {
+                    openNotification("error", "Failed to update user status!");
+                }
+            } else {
+                openNotification("error", "Failed to update user status!");
+            }
+        }
+    }
+
+    useEffect(() => {
+        if (!activeDropdown) return;
+        const handleClick = (event) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target)
+            ) {
+                setActiveDropdown(null);
+            }
+        };
+        document.addEventListener("mousedown", handleClick);
+        return () => document.removeEventListener("mousedown", handleClick);
+    }, [activeDropdown]);
 
     return (
         <div className={styles.account}>
-                <Sidebar />
+            {contextHolder}
+            <Sidebar />
             <div className={styles.container}>
                 <div className={styles.header}>
                     <div>
-                        <h1 className={styles.title}>Quản lý người dùng</h1>
-                        <p className={styles.subtitle}>Quản lý tài khoản và quyền hạn người dùng</p>
+                        <h1 className={styles.title}>User Management</h1>
+                        <p className={styles.subtitle}>Manage user accounts and permissions</p>
                     </div>
-                    <button className={styles.addButton}>+ Thêm người dùng</button>
+                    <button onClick={() => setIsModalCreateOpen(true)} className={styles.addButton}>+ Add user</button>
+                    <CreateUser isOpen={isModalCreateOpen} onSuccess={() => { fetchUsers() }} onClose={() => setIsModalCreateOpen(false)} openNotification={openNotification} />
                 </div>
 
                 {/* Stats Cards */}
@@ -88,39 +159,40 @@ function Account() {
                         </div>
                         <div>
                             <div className={styles.statNumber}>{users.length}</div>
-                            <div className={styles.statLabel}>Tổng người dùng</div>
-                            <div className={styles.statChange}>+2 từ tháng trước</div>
+                            <div className={styles.statLabel}>Total users</div>
                         </div>
                     </div>
 
                     <div className={styles.statCard}>
-                        <div className={`${styles.statIcon} ${styles.activeIcon}`}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                <circle cx="9" cy="7" r="4" />
-                                <circle cx="17" cy="7" r="2" fill="currentColor" />
-                            </svg>
+                        <div className={`${styles.statIcon} ${styles.staffIcon}`}>
+                            <img width="30" height="30" src="https://img.icons8.com/fluency/30/commercial-development-management.png" alt="commercial-development-management"/>
                         </div>
                         <div>
-                            <div className={styles.statNumber}>{activeUsers}</div>
-                            <div className={styles.statLabel}>Đang hoạt động</div>
-                            <div className={styles.statChange}>75% tổng số</div>
+                            <div className={styles.statNumber}>{users.filter(user => user.role === 'Staff').length}</div>
+                            <div className={styles.statLabel}>Total staff</div>
+                            <div className={styles.statChange}>{((users.filter(user => user.role === 'Staff').length / users.length) * 100).toFixed(1)}% of total</div>
                         </div>
                     </div>
 
                     <div className={styles.statCard}>
-                        <div className={`${styles.statIcon} ${styles.inactiveIcon}`}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                <circle cx="9" cy="7" r="4" />
-                                <line x1="17" y1="8" x2="22" y2="13" />
-                                <line x1="22" y1="8" x2="17" y2="13" />
-                            </svg>
+                        <div className={`${styles.statIcon} ${styles.dentistIcon}`}>
+                            <img width="30" height="30" src="https://img.icons8.com/color/30/dentist-skin-type-3.png" alt="dentist-skin-type-3"/>
                         </div>
                         <div>
-                            <div className={styles.statNumber}>{inactiveUsers}</div>
-                            <div className={styles.statLabel}>Tạm khóa</div>
-                            <div className={styles.statChange}>25% tổng số</div>
+                            <div className={styles.statNumber}>{users.filter(user => user.role === 'Dentist').length}</div>
+                            <div className={styles.statLabel}>Total Dentist</div>
+                            <div className={styles.statChange}>{((users.filter(user => user.role === 'Dentist').length / users.length) * 100).toFixed(1)}% of total</div>
+                        </div>
+                    </div>
+
+                    <div className={styles.statCard}>
+                        <div className={`${styles.statIcon} ${styles.customerIcon}`}>
+                            <img width="30" height="30" src="https://img.icons8.com/plasticine/30/budget.png" alt="budget"/>
+                        </div>
+                        <div>
+                            <div className={styles.statNumber}>{users.filter(user => user.role === 'Customer').length}</div>
+                            <div className={styles.statLabel}>Total Customer</div>
+                            <div className={styles.statChange}>{((users.filter(user => user.role === 'Customer').length / users.length) * 100).toFixed(1)}% of total</div>
                         </div>
                     </div>
                 </div>
@@ -129,8 +201,8 @@ function Account() {
                 <div className={styles.tableSection}>
                     <div className={styles.tableSectionHeader}>
                         <div>
-                            <h2 className={styles.tableSectionTitle}>Danh sách người dùng</h2>
-                            <p className={styles.tableSectionSubtitle}>Quản lý và theo dõi thông tin người dùng</p>
+                            <h2 className={styles.tableSectionTitle}>List of users</h2>
+                            <p className={styles.tableSectionSubtitle}>Manage and track user information</p>
                         </div>
                         <div className={styles.tableControls}>
                             <div className={styles.searchContainer}>
@@ -148,7 +220,7 @@ function Account() {
                                 </svg>
                                 <input
                                     type="text"
-                                    placeholder="Tìm kiếm người dùng..."
+                                    placeholder="Search for users..."
                                     className={styles.searchInput}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -166,10 +238,13 @@ function Account() {
                                 >
                                     <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
                                 </svg>
-                                <select className={styles.filterSelect}>
-                                    <option>Tất cả</option>
-                                    <option>Hoạt động</option>
-                                    <option>Tạm khóa</option>
+                                <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)} className={styles.filterSelect}>
+                                    <option value="">All</option>
+                                    {[...new Set(users.map((user) => user.role))].map((role) => (
+                                        <option key={role} value={role}>
+                                            {role}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
@@ -180,45 +255,50 @@ function Account() {
                         <table className={styles.table}>
                             <thead>
                                 <tr>
-                                    <th>Người dùng</th>
-                                    <th>Liên hệ</th>
-                                    <th>Vai trò</th>
-                                    <th>Trạng thái</th>
-                                    <th>Ngày tạo</th>
-                                    <th>Thao tác</th>
+                                    <th>User</th>
+                                    <th>Contact</th>
+                                    <th>Role</th>
+                                    <th>Gender</th>
+                                    <th>Address</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredUsers.map((user) => (
-                                    <tr key={user.id}>
+                                    <tr key={user._id}>
                                         <td>
                                             <div className={styles.userInfo}>
-                                                <div className={styles.avatar}>{user.avatar}</div>
-                                                <span className={styles.userName}>{user.name}</span>
+                                                <img src={user.avatar} alt="User Avatar" className={styles.avatar} />
+                                                <span className={styles.userName}>{user.fullName}</span>
                                             </div>
                                         </td>
                                         <td>
                                             <div className={styles.contactInfo}>
                                                 <div className={styles.email}>{user.email}</div>
-                                                <div className={styles.phone}>{user.phone}</div>
+                                                <div className={styles.phone}>{user.phoneNumber}</div>
                                             </div>
                                         </td>
                                         <td>
                                             <span className={`${styles.roleBadge} ${styles[user.role.toLowerCase()]}`}>{user.role}</span>
                                         </td>
                                         <td>
-                                            <span
-                                                className={`${styles.statusBadge} ${user.status === "active" ? styles.active : styles.inactive}`}
-                                            >
-                                                {user.status === "active" ? "Hoạt động" : "Tạm khóa"}
+                                            <span className={styles.genderBadge}>{user.gender}</span>
+                                        </td>
+                                        <td className={styles.dateCell}>{user.address}</td>
+                                        <td>
+                                            <span className={`${styles.statusBadge} ${user.isActive ? styles.active : styles.inactive}`}>
+                                                {user.isActive ? "Active" : "Inactive"}
                                             </span>
                                         </td>
-                                        <td className={styles.dateCell}>{user.createdAt}</td>
                                         <td>
-                                            <div className={styles.actionContainer}>
+                                            <div className={styles.actionContainer} ref={activeDropdown === user._id ? dropdownRef : null}>
                                                 <button
                                                     className={styles.actionButton}
-                                                    onClick={() => setActiveDropdown(activeDropdown === user.id ? null : user.id)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setActiveDropdown(activeDropdown === user._id ? null : user._id)
+                                                    }}
                                                 >
                                                     <svg
                                                         width="16"
@@ -233,7 +313,7 @@ function Account() {
                                                         <circle cx="12" cy="19" r="1" />
                                                     </svg>
                                                 </button>
-                                                {activeDropdown === user.id && (
+                                                {activeDropdown === user._id && (
                                                     <div className={styles.dropdown}>
                                                         <button className={styles.dropdownItem}>
                                                             <svg
@@ -247,41 +327,43 @@ function Account() {
                                                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                                                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                                                             </svg>
-                                                            Chỉnh sửa
+                                                            Edit
                                                         </button>
-                                                        <button className={styles.dropdownItem} onClick={() => handleStatusToggle(user.id)}>
-                                                            <svg
-                                                                width="14"
-                                                                height="14"
-                                                                viewBox="0 0 24 24"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                strokeWidth="2"
+                                                        <button className={styles.dropdownItem} onClick={() => handleStatusToggle(user._id)}>
+                                                            {user.isActive ? (
+                                                                <>
+                                                                <LockKeyhole className={styles.iconLockAccount} size={14} color="currentColor" />
+                                                                Lock{" "}
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                <KeyRound className={styles.iconUnlockAccount} size={14} color="green" />
+                                                                Unlock{" "}
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                        <ConfirmDelete
+                                                            title="Confirm user deletion"
+                                                            description={`Are you sure you want to delete user ${user.fullName}? This action cannot be undone.`}
+                                                            itemName={user.fullName}
+                                                            onConfirm={() => handleDelete(user._id)}>
+                                                            <button
+                                                                className={`${styles.dropdownItem} ${styles.deleteItem}`}
                                                             >
-                                                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                                                <circle cx="9" cy="7" r="4" />
-                                                                <line x1="17" y1="8" x2="22" y2="13" />
-                                                                <line x1="22" y1="8" x2="17" y2="13" />
-                                                            </svg>
-                                                            {user.status === "active" ? "Tạm khóa" : "Kích hoạt"}
-                                                        </button>
-                                                        <button
-                                                            className={`${styles.dropdownItem} ${styles.deleteItem}`}
-                                                            onClick={() => handleDelete(user.id)}
-                                                        >
-                                                            <svg
-                                                                width="14"
-                                                                height="14"
-                                                                viewBox="0 0 24 24"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                strokeWidth="2"
-                                                            >
-                                                                <polyline points="3,6 5,6 21,6" />
-                                                                <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6" />
-                                                            </svg>
-                                                            Xóa
-                                                        </button>
+                                                                <svg
+                                                                    width="14"
+                                                                    height="14"
+                                                                    viewBox="0 0 24 24"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    strokeWidth="2"
+                                                                >
+                                                                    <polyline points="3,6 5,6 21,6" />
+                                                                    <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6" />
+                                                                </svg>
+                                                                Delete
+                                                            </button>
+                                                        </ConfirmDelete>
                                                     </div>
                                                 )}
                                             </div>

@@ -19,7 +19,7 @@
 }
 
 .headerContainer {
-  max-width: 80rem;
+  max-width: 90rem;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -32,7 +32,7 @@
 
 @media (min-width: 1024px) {
   .headerContainer {
-    padding: 0 2rem;
+    padding: 0 1rem;
   }
 }
 
@@ -52,6 +52,7 @@
 .logo {
   font-size: 1.5rem;
   font-weight: 700;
+  cursor: pointer;
 }
 
 .logoNormal {

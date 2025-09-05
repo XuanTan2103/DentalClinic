@@ -7,29 +7,6 @@ const serviceController = {
   createService: async (req, res) => {
     try {
       const { name, description, duration, price, type, guarantee } = req.body;
-
-      if (!name) {
-        return res.status(400).json({ message: "Service name is required" });
-      }
-      if (!description) {
-        return res.status(400).json({ message: "Service description is required" });
-      }
-      if (!duration) {
-        return res.status(400).json({ message: "Service duration is required" });
-      }
-      if (!price) {
-        return res.status(400).json({ message: "Service price is required" });
-      }
-      if (!type) {
-        return res.status(400).json({ message: "Service type is required" });
-      }
-      if (!guarantee) {
-        return res.status(400).json({ message: "Service guarantee is required" });
-      }
-      if (!req.file) {
-        return res.status(400).json({ message: "Service image is required" });
-      }
-
       let imageUrl = null;
 
       if (req.file) {

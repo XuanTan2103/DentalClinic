@@ -47,10 +47,12 @@ function UpdateService({ isOpenUpdate, onClose, onSuccess, service, openNotifica
       data.append("image", formData.image);
     }
     try {
+      const token = localStorage.getItem('token');
       await axios.put(`http://localhost:5000/service/update-service/${service._id}`, data,
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
           },
         })
       openNotification("success", "Service updated successfully.");

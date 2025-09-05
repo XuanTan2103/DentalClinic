@@ -1,24 +1,45 @@
-import React, { useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.css';
-import { Home, Users, BarChart3, Settings, FileText, Mail, ChevronLeft, ChevronRight, LogOut, User, ScrollText } from "lucide-react"
+import { Users, BarChart3, Settings, FileText, Mail, ChevronLeft, ChevronRight, LogOut, User, ScrollText } from "lucide-react";
+import { jwtDecode } from 'jwt-decode';
 
 function Sidebar() {
     const [collapsed, setCollapsed] = useState(false);
     const location = useLocation();
+    const [user, setUser] = useState(null);
+    const navigate = useNavigate();
 
     const onToggle = () => {
         setCollapsed(!collapsed);
     };
     
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        navigate('/');
+    }
+
     const menuItems = [
         { icon: BarChart3, label: "Dashboard", href: "/dashboard" },
         { icon: Users, label: "Accounts", href: "/accounts" },
         { icon: ScrollText, label: "Services", href: "/manage-service" },
         { icon: FileText, label: "Báo cáo", href: "/reports" },
-        { icon: Mail, label: "Tin nhắn", href: "/messages" },
+        { icon: Mail, label: "Messenger", href: "/messenger" },
         { icon: Settings, label: "Cài đặt", href: "/settings" },
     ];
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+                setUser(decoded);
+            } catch (error) {
+                console.error("Invalid token:", error);
+                setUser(null);
+            }
+        }
+    },[]);
 
     return (
         <div className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}>
@@ -63,16 +84,20 @@ function Sidebar() {
              <div className={styles.userSection}>
                  <div className={styles.userInfo}>
                      <div className={styles.avatar}>
-                         <User size={20} />
+                            {user && user.avatar ? (
+                                <img src={user.avatar} alt="User Avatar" className={styles.userAvatar} />
+                            ) : (
+                                <User size={20} className={styles.defaultAvatar} />
+                            )}
                      </div>
                      {!collapsed && (
                          <div className={styles.userDetails}>
-                             <span className={styles.userName}>Nguyễn Văn A</span>
-                             <span className={styles.userRole}>Quản trị viên</span>
+                             <span className={styles.userName}>{user?.fullName}</span>
+                             <span className={styles.userRole}>{user?.role}</span>
                          </div>
                      )}
                      {!collapsed && (
-                        <button className={styles.logoutButton} title="Logout">
+                        <button onClick={handleLogout} className={styles.logoutButton} title="Logout">
                             <LogOut size={18} />
                         </button>
                      )}

@@ -16,6 +16,7 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
   const fileInputRef = useRef(null)
   const [imagePreview, setImagePreview] = useState("")
   const [loading, setLoading] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -32,10 +33,12 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
       data.append("image", formData.image);
     }
     try {
+      const token = localStorage.getItem('token');
       await axios.post("http://localhost:5000/service/create-service", data,
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
           },
         })
       openNotification("success", "Service created successfully.");
@@ -55,6 +58,11 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
       console.error("Failed to create service:", error)
       if (error.response && error.response.data) {
         if (error.response.data.errors && error.response.data.errors.length > 0) {
+          const backendErrors = {};
+          error.response.data.errors.forEach(err => {
+            backendErrors[err.path] = err.msg;
+          });
+          setFieldErrors(backendErrors);
           openNotification("error", error.response.data.errors[0].msg);
         } else if (error.response.data.message) {
           openNotification("error", error.response.data.message);
@@ -119,7 +127,7 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
                 placeholder="Enter service name"
-                className={styles.input}
+                className={`${styles.input} ${fieldErrors.name ? styles.inputError : ""}`}
               />
             </div>
 
@@ -133,7 +141,7 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
                 onChange={(e) => handleInputChange("description", e.target.value)}
                 placeholder="Describe your service in detail"
                 rows={4}
-                className={styles.textarea}
+                className={`${styles.textarea} ${fieldErrors.description ? styles.inputError : ""}`}
               />
             </div>
 
@@ -149,7 +157,7 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
                   value={formData.duration || ""}
                   onChange={(e) => handleInputChange("duration", Number.parseInt(e.target.value) || 0)}
                   placeholder="0"
-                  className={styles.input}
+                  className={`${styles.input} ${fieldErrors.duration ? styles.inputError : ""}`}
                 />
               </div>
 
@@ -165,7 +173,7 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
                   value={formData.price || ""}
                   onChange={(e) => handleInputChange("price", Number.parseFloat(e.target.value) || 0)}
                   placeholder="0"
-                  className={styles.input}
+                  className={`${styles.input} ${fieldErrors.price ? styles.inputError : ""}`}
                 />
               </div>
             </div>
@@ -178,7 +186,7 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
                 id="type"
                 value={formData.type}
                 onChange={(e) => handleInputChange("type", e.target.value)}
-                className={styles.select}
+                className={`${styles.select} ${fieldErrors.type ? styles.inputError : ""}`}
               >
                 <option value="">Select service type</option>
                 <option value="Check-up">Check-up</option>
@@ -199,7 +207,7 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
                 value={formData.guarantee}
                 onChange={(e) => handleInputChange("guarantee", e.target.value)}
                 placeholder="VD: One year"
-                className={styles.input}
+                className={`${styles.input} ${fieldErrors.guarantee ? styles.inputError : ""}`}
               />
             </div>
 
@@ -215,7 +223,7 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
                 />
 
                 {imagePreview ? (
-                  <div className={styles.imagePreview}>
+                  <div className={`${styles.imagePreview} ${fieldErrors.image ? styles.inputError : ""}`}>
                     <img src={imagePreview || "/placeholder.svg"} alt="Preview" className={styles.previewImage} />
                     <div className={styles.imageOverlay}>
                       <button type="button" onClick={triggerFileInput} className={styles.changeImageBtn}>
@@ -224,7 +232,7 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
                     </div>
                   </div>
                 ) : (
-                  <div className={styles.uploadArea} onClick={triggerFileInput}>
+                  <div className={`${styles.uploadArea} ${fieldErrors.image ? styles.inputError : ""}`} onClick={triggerFileInput}>
                     <div className={styles.uploadContent}>
                       <div className={styles.uploadIcon}>📁</div>
                       <p className={styles.uploadText}>Click to upload photo</p>

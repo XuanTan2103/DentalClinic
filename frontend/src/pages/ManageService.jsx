@@ -62,7 +62,14 @@ function ManageService() {
 
   const fetchServices = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/service/all-services")
+      const token = localStorage.getItem('token');
+      const res = await axios.get("http://localhost:5000/service/all-services",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        }
+      )
       setServices(res.data.services)
     } catch (err) {
       console.error("Error fetching services:", err)
@@ -70,13 +77,30 @@ function ManageService() {
   }
 
   const handleDelete = async (serviceId) => {
+    const token = localStorage.getItem('token');
     try {
-      await axios.delete(`http://localhost:5000/service/delete-service/${serviceId}`);
+      await axios.delete(`http://localhost:5000/service/delete-service/${serviceId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       setServices(services.filter(service => service._id !== serviceId));
       openNotification("success", "Service deleted successfully.");
     } catch (error) {
       console.error("Error deleting service:", error);
-      openNotification("error", "Failed to delete service. Please try again.");
+      if (error.response && error.response.data) {
+        if (error.response.data.errors && error.response.data.errors.length > 0) {
+          openNotification("error", error.response.data.errors[0].msg);
+        } else if (error.response.data.message) {
+          openNotification("error", error.response.data.message);
+        } else {
+          openNotification("error", "Failed to delete service!");
+        }
+      } else {
+        openNotification("error", "Failed to delete service!");
+      }
     }
   }
 
@@ -196,9 +220,9 @@ function ManageService() {
                 </svg>
                 <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className={styles.filterSelect}>
                   <option value="">All</option>
-                  {services.map((service) => (
-                    <option key={service._id} value={service.type}>
-                      {service.type}
+                  {[...new Set(services.map((service) => service.type))].map((type) => (
+                    <option key={type} value={type}>
+                      {type}
                     </option>
                   ))}
                 </select>
