@@ -92,14 +92,14 @@
   }
   
   .menuItem.active {
-    background-color: #5a60c7;
+    background-color: #637AB9;
     color: #ffffff;
     transform: translateX(4px);
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
   }
   
   .menuItem.active:hover {
-    background-color: #4338ca;
+    background-color: #31326F;
     color: #ffffff;
   }
   

@@ -115,7 +115,7 @@ function Login() {
 
             {/* Forgot Password */}
             <div className={styles.forgotPassword}>
-              <a href="/forgotpassword" className={styles.forgotLink}>
+              <a href="/forgot-password" className={styles.forgotLink}>
                 Forgot Password?
               </a>
             </div>

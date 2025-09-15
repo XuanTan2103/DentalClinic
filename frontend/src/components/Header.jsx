@@ -53,7 +53,7 @@ function Header() {
                                 <UserOutlined className={styles.userIcon} />
                             </div>
                         ) : (
-                            <button onClick={() => navigate('/login')} className={`${styles.ctaButton} ${isSticky ? styles.ctaButtonSticky : styles.ctaButtonNormal}`}>Login</button>
+                            <button onClick={() => navigate('/')} className={`${styles.ctaButton} ${isSticky ? styles.ctaButtonSticky : styles.ctaButtonNormal}`}>Login</button>
                         )}
                     </div>
                     <button className={`${styles.mobileMenuButton} ${isSticky ? styles.mobileMenuButtonSticky : styles.mobileMenuButtonNormal}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>

@@ -1,12 +1,20 @@
 const express = require('express');
 const cors = require('cors');
+const http = require("http");
 require('dotenv').config();
 const userRoutes = require('./routes/user');
 const authRoutes = require('./routes/auth');
 const serviceRouters = require('./routes/service');
+const chatbotRoutes = require('./routes/chatbot');
+const conversationRoutes = require("./routes/conversation");
+const messageRoutes = require("./routes/message");
+const initSocket = require("./config/socket");
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true
+}))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -20,13 +28,19 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/user', userRoutes);
 app.use('/auth', authRoutes);
 app.use('/service', serviceRouters);
+app.use('/chatbot', chatbotRoutes);
+app.use('/conversation', conversationRoutes);
+app.use('/message', messageRoutes);
+
+const server = http.createServer(app);
+const io = initSocket(server);
 
 const PORT = process.env.PORT || 5000;
 app.get('/', (req, res) => {
   res.send('Backend is working!');
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 

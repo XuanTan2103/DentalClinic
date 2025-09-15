@@ -9,7 +9,7 @@ import banner4 from '../assets/banner4.jpg';
 import banner5 from '../assets/banner5.png';
 import banner6 from '../assets/banner6.png';
 import about from '../assets/about.png';
-import Messenger from '../components/Messenger';
+import Chat from '../components/Chat';
 import ChatBot from '../components/ChatBot';
 
 function HomePage() {
@@ -30,7 +30,7 @@ function HomePage() {
   return (
     <div className={styles.container}>
       <Header />
-      <Messenger
+      <Chat
         isOpen={openWidget === 'messenger'}
         onToggle={() => setOpenWidget(prev => prev === 'messenger' ? null : 'messenger')}
         isOtherOpen={openWidget === 'chatbot'} />
