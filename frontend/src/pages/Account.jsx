@@ -4,6 +4,7 @@ import Sidebar from "../components/Sidebar";
 import axios from "axios";
 import { notification } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import Swal from "sweetalert2";
 import { LockKeyhole, KeyRound } from 'lucide-react';
 import ConfirmDelete from "../components/ConfirmDelete";
 import CreateUser from "./CreateUser";
@@ -90,8 +91,19 @@ function Account() {
         }
     }
 
-    const handleStatusToggle = async (userId) => {
+    const handleStatusToggle = async (userId, isActive) => {
         const token = localStorage.getItem('token');
+        const result = await Swal.fire({
+            title: "Are you sure?",
+            text: isActive ? "Do you want to Lock this user?" : "Do you want to UnLock this user?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: isActive ? "Yes, Lock this" : "Yes, UnLock this",
+        });
+
+        if (!result.isConfirmed) return;
         try {
             const res = await axios.patch(`http://localhost:5000/user/toggle-status/${userId}`, {}, {
                 headers: {
@@ -105,7 +117,7 @@ function Account() {
         } catch (error) {
             console.error("Error toggling user status:", error);
             if (error.response && error.response.data) {
-                if (error.response && error.response.data.errors.length > 0) {
+                if (Array.isArray(error.response.data.errors) && error.response.data.errors.length > 0) {
                     openNotification("error", error.response.data.errors[0].msg);
                 } else if (error.response.data.message) {
                     openNotification("error", error.response.data.message);
@@ -165,7 +177,7 @@ function Account() {
 
                     <div className={styles.statCard}>
                         <div className={`${styles.statIcon} ${styles.staffIcon}`}>
-                            <img width="30" height="30" src="https://img.icons8.com/fluency/30/commercial-development-management.png" alt="commercial-development-management"/>
+                            <img width="30" height="30" src="https://img.icons8.com/fluency/30/commercial-development-management.png" alt="commercial-development-management" />
                         </div>
                         <div>
                             <div className={styles.statNumber}>{users.filter(user => user.role === 'Staff').length}</div>
@@ -176,7 +188,7 @@ function Account() {
 
                     <div className={styles.statCard}>
                         <div className={`${styles.statIcon} ${styles.dentistIcon}`}>
-                            <img width="30" height="30" src="https://img.icons8.com/color/30/dentist-skin-type-3.png" alt="dentist-skin-type-3"/>
+                            <img width="30" height="30" src="https://img.icons8.com/color/30/dentist-skin-type-3.png" alt="dentist-skin-type-3" />
                         </div>
                         <div>
                             <div className={styles.statNumber}>{users.filter(user => user.role === 'Dentist').length}</div>
@@ -187,7 +199,7 @@ function Account() {
 
                     <div className={styles.statCard}>
                         <div className={`${styles.statIcon} ${styles.customerIcon}`}>
-                            <img width="30" height="30" src="https://img.icons8.com/plasticine/30/budget.png" alt="budget"/>
+                            <img width="30" height="30" src="https://img.icons8.com/plasticine/30/budget.png" alt="budget" />
                         </div>
                         <div>
                             <div className={styles.statNumber}>{users.filter(user => user.role === 'Customer').length}</div>
@@ -329,16 +341,16 @@ function Account() {
                                                             </svg>
                                                             Edit
                                                         </button>
-                                                        <button className={styles.dropdownItem} onClick={() => handleStatusToggle(user._id)}>
+                                                        <button className={styles.dropdownItem} onClick={() => handleStatusToggle(user._id, user.isActive)}>
                                                             {user.isActive ? (
                                                                 <>
-                                                                <LockKeyhole className={styles.iconLockAccount} size={14} color="currentColor" />
-                                                                Lock{" "}
+                                                                    <LockKeyhole className={styles.iconLockAccount} size={14} color="currentColor" />
+                                                                    Lock{" "}
                                                                 </>
                                                             ) : (
                                                                 <>
-                                                                <KeyRound className={styles.iconUnlockAccount} size={14} color="green" />
-                                                                Unlock{" "}
+                                                                    <KeyRound className={styles.iconUnlockAccount} size={14} color="green" />
+                                                                    Unlock{" "}
                                                                 </>
                                                             )}
                                                         </button>

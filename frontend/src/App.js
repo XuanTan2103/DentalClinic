@@ -11,6 +11,8 @@ import Messenger from './pages/Messenger';
 import ChangePassword from './auth/ChangePassword';
 import ChangePasswordFirstLogin from './auth/ChangePasswordFirstLogin';
 import Profile from './pages/Profile';
+import About from './pages/About';
+import ForgotPassword from './pages/ForgotPassword';
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/change-pasword-first-login" element={<ChangePasswordFirstLogin />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 import { Users, BarChart3, Settings, FileText, Mail, ChevronLeft, ChevronRight, LogOut, User, ScrollText } from "lucide-react";
+import Swal from "sweetalert2";
 import { jwtDecode } from 'jwt-decode';
 
 function Sidebar() {
@@ -13,10 +14,23 @@ function Sidebar() {
     const onToggle = () => {
         setCollapsed(!collapsed);
     };
-    
+
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        navigate('/');
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You will be logged out of the system.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, logout",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                localStorage.removeItem("token");
+                navigate("/");
+                Swal.fire("Logged out!", "You have been logged out successfully.", "success");
+            }
+        });
     }
 
     const menuItems = [
@@ -39,18 +53,18 @@ function Sidebar() {
                 setUser(null);
             }
         }
-    },[]);
+    }, []);
 
     return (
         <div className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}>
             {/* Header with toggle button */}
             <div className={styles.header}>
-                                 {!collapsed && (
-                     <div className={styles.titleContainer}>
-                         <img src="https://img.icons8.com/external-others-phat-plus/45/external-dental-odontologist-color-line-others-phat-plus.png" alt="" />
-                         <h2 className={styles.title}>Gentle Care Dental</h2>
-                     </div>
-                 )}
+                {!collapsed && (
+                    <div className={styles.titleContainer}>
+                        <img src="https://img.icons8.com/external-others-phat-plus/45/external-dental-odontologist-color-line-others-phat-plus.png" alt="" />
+                        <h2 className={styles.title}>Gentle Care Dental</h2>
+                    </div>
+                )}
                 <button
                     className={styles.toggleButton}
                     onClick={onToggle}
@@ -67,8 +81,8 @@ function Sidebar() {
                         const isActive = location.pathname === item.href;
                         return (
                             <li key={index}>
-                                <Link 
-                                    to={item.href} 
+                                <Link
+                                    to={item.href}
                                     className={`${styles.menuItem} ${isActive ? styles.active : ''}`}
                                 >
                                     <item.icon size={20} className={styles.menuIcon} />
@@ -80,29 +94,29 @@ function Sidebar() {
                 </ul>
             </nav>
 
-                         {/* User section at bottom */}
-             <div className={styles.userSection}>
-                 <div className={styles.userInfo}>
-                     <div className={styles.avatar}>
-                            {user && user.avatar ? (
-                                <img src={user.avatar} alt="User Avatar" className={styles.userAvatar} />
-                            ) : (
-                                <User size={20} className={styles.defaultAvatar} />
-                            )}
-                     </div>
-                     {!collapsed && (
-                         <div className={styles.userDetails}>
-                             <span className={styles.userName}>{user?.fullName}</span>
-                             <span className={styles.userRole}>{user?.role}</span>
-                         </div>
-                     )}
-                     {!collapsed && (
+            {/* User section at bottom */}
+            <div className={styles.userSection}>
+                <div className={styles.userInfo}>
+                    <div className={styles.avatar}>
+                        {user && user.avatar ? (
+                            <img src={user.avatar} alt="User Avatar" className={styles.userAvatar} />
+                        ) : (
+                            <User size={20} className={styles.defaultAvatar} />
+                        )}
+                    </div>
+                    {!collapsed && (
+                        <div className={styles.userDetails}>
+                            <span className={styles.userName}>{user?.fullName}</span>
+                            <span className={styles.userRole}>{user?.role}</span>
+                        </div>
+                    )}
+                    {!collapsed && (
                         <button onClick={handleLogout} className={styles.logoutButton} title="Logout">
                             <LogOut size={18} />
                         </button>
-                     )}
-                 </div>
-             </div>
+                    )}
+                </div>
+            </div>
         </div>
     )
 }

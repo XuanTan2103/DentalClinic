@@ -47,7 +47,7 @@
 
 .sendButton {
   margin-left: 8px;
-  background-color: #0084ff;
+  background-color: #637AB9;
   color: white;
   border: none;
   border-radius: 8px;
@@ -86,7 +86,7 @@
 }
 
 .chatHeader {
-  background-color: #0084ff;
+  background-color: #637AB9;
   color: white;
   padding: 16px;
   display: flex;
@@ -115,10 +115,43 @@
 .chatBody {
   flex: 1;
   padding: 20px;
+  overflow-y: auto;
+  background:
+    linear-gradient(rgba(246, 246, 246, 0.9), rgba(246, 246, 246, 0.9)),
+    url("../assets/backgroundChatWindow.png");
+  background-size: contain;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f8f9fa;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message {
+  position: relative;
+  z-index: 2;
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+.myMessage {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #4FB7B3, #307ac5);
+  color: white;
+  border-bottom-right-radius: 6px;
+  margin-left: auto;
+}
+
+.theirMessage {
+  align-self: flex-start;
+  background-color: #ffffff;
+  color: #333;
+  border: 2px solid #e0e0e0;
+  border-bottom-left-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .welcomeText {
@@ -135,9 +168,11 @@
   0% {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 0 rgba(0, 132, 255, 0.7);
   }
+
   70% {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 10px rgba(0, 132, 255, 0);
   }
+
   100% {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 0 rgba(0, 132, 255, 0);
   }

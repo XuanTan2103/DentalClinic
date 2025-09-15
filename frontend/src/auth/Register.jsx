@@ -274,7 +274,7 @@ function Register() {
                     <div className={styles.loginSection}>
                         <p className={styles.loginText}>
                             Already have an account?{' '}
-                            <a href="/login" className={styles.loginLink}>
+                            <a href="/" className={styles.loginLink}>
                                 Sign in now
                             </a>
                         </p>
