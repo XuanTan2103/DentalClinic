@@ -18,8 +18,14 @@ function Login() {
     setError("");
     try {
       const res = await axios.post('http://localhost:5000/auth/login', { email, password });
-      localStorage.setItem('token', res.data.token);
-      navigate('/home');
+      const { token, user } = res.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      if (user.role === "Admin" || user.role === "Staff" || user.role === "Dentist") {
+        navigate("/dashboard");
+      } else {
+        navigate("/home");
+      }
     } catch (error) {
       setIsLoading(false);
       if (error.response && error.response.data) {

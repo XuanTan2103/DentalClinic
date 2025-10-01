@@ -13,6 +13,7 @@ import ChangePasswordFirstLogin from './auth/ChangePasswordFirstLogin';
 import Profile from './pages/Profile';
 import About from './pages/About';
 import ForgotPassword from './pages/ForgotPassword';
+import DentistWorkingTime from './pages/DentistWorkingTime';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/about" element={<About />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/dentist-working-time" element={<DentistWorkingTime />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

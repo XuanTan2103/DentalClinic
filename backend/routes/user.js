@@ -14,5 +14,6 @@ router.get('/get-user/:id', verifyToken, verifyRole(['Admin', 'Staff', 'Dentist'
 router.get('/profile', verifyToken, userController.getProfile);
 router.patch('/update-profile', verifyToken, validateUpdateProfile, userController.updateProfile);
 router.patch('/update-photo', verifyToken, upload.single("avatar"), handleMulterError, userController.updatePhoto);
+router.get('/get-all-dentist', verifyToken, verifyRole(['Admin', 'Staff']), userController.getAllDentists);
 
 module.exports = router;

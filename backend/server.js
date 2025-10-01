@@ -8,6 +8,8 @@ const serviceRouters = require('./routes/service');
 const chatbotRoutes = require('./routes/chatbot');
 const conversationRoutes = require("./routes/conversation");
 const messageRoutes = require("./routes/message");
+const dentistProfileRoutes = require("./routes/dentistProfile");
+const dentistWorkingTimeRoutes = require("./routes/dentistWorkingTime");
 const initSocket = require("./config/socket");
 
 const app = express();
@@ -31,6 +33,8 @@ app.use('/service', serviceRouters);
 app.use('/chatbot', chatbotRoutes);
 app.use('/conversation', conversationRoutes);
 app.use('/message', messageRoutes);
+app.use('/dentistProfile', dentistProfileRoutes);
+app.use('/dentistWorkingTime', dentistWorkingTimeRoutes);
 
 const server = http.createServer(app);
 const io = initSocket(server);

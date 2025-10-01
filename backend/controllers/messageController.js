@@ -1,3 +1,4 @@
+// controllers/messageController.js
 const Message = require("../models/Message");
 const Conversation = require("../models/Conversation");
 const conversationController = require("./conversationController");
@@ -36,25 +37,24 @@ const messageController = {
         content,
       });
 
-      await newMsg.save();
+      const saved = await newMsg.save();
 
       conv.lastMessage = content;
       conv.lastSender = sender;
+      conv.updatedAt = Date.now();
       await conv.save();
-
-      const populatedMsg = await newMsg.populate("sender", "name role");
-
-      // Emit realtime message to room
+      const populatedMsg = await Message.findById(saved._id)
+        .populate("sender", "_id fullName avatar role");
       try {
         const io = getIo();
         if (io) {
           io.to(conversationId.toString()).emit("newMessage", populatedMsg);
 
-          // Emit conversation update để cập nhật preview
-          const conversationController = require("./conversationController");
           conversationController.emitConversationUpdate(conversationId);
         }
-      } catch (_) { }
+      } catch (emitErr) {
+        console.error("Socket emit error:", emitErr);
+      }
 
       res.status(201).json({
         message: "Message sent successfully",
@@ -74,7 +74,7 @@ const messageController = {
       const { id } = req.params;
       const msgs = await Message.find({ conversation: id })
         .sort({ createdAt: 1 })
-        .populate("sender", "name role");
+        .populate("sender", "_id fullName avatar role");
 
       res.status(200).json({ messages: msgs });
     } catch (error) {

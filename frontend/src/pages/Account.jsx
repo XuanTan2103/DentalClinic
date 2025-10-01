@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import { LockKeyhole, KeyRound } from 'lucide-react';
 import ConfirmDelete from "../components/ConfirmDelete";
 import CreateUser from "./CreateUser";
+import UserProfile from "../components/UserProfile";
 
 
 function Account() {
@@ -18,6 +19,8 @@ function Account() {
     const dropdownRef = useRef(null);
     const [api, contextHolder] = notification.useNotification();
     const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
+    const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState(null);
 
     const filteredUsers = users.filter((user) => {
         const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -278,7 +281,7 @@ function Account() {
                             </thead>
                             <tbody>
                                 {filteredUsers.map((user) => (
-                                    <tr key={user._id}>
+                                    <tr key={user._id} onClick={() => { setIsModalDetailOpen(true); setSelectedUserId(user._id); }}>
                                         <td>
                                             <div className={styles.userInfo}>
                                                 <img src={user.avatar} alt="User Avatar" className={styles.avatar} />
@@ -385,6 +388,7 @@ function Account() {
                             </tbody>
                         </table>
                     </div>
+                    <UserProfile isOpen={isModalDetailOpen} onClose={() => setIsModalDetailOpen(false)} userId={selectedUserId} />
                 </div>
             </div>
         </div>

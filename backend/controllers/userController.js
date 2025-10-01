@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const DentistProfile = require('../models/DentistProfile');
+const DentistWorkingTime = require('../models/DentistWorkingTime');
 const bcrypt = require('bcrypt');
 const { get } = require('mongoose');
 require('dotenv').config();
@@ -204,12 +206,35 @@ const userController = {
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             }
-            res.status(200).json({ message: 'User fetched successfully', user });
+
+            let extraInfo = null;
+            let workingTime = null;
+
+            if (user.role === 'Customer') {
+                extraInfo = await PatientRecord.findOne({ customerId: id });
+            }
+
+            if (user.role === 'Dentist') {
+                extraInfo = await DentistProfile.findOne({ dentistId: id });
+
+                workingTime = await DentistWorkingTime.findOne({
+                    dentistId: id,
+                    isFixed: true
+                }).select('workingDays morning afternoon');
+            }
+
+            res.status(200).json({
+                message: 'User fetched successfully',
+                user,
+                extraInfo,
+                workingTime
+            });
         } catch (err) {
             console.error("Error fetching user:", err);
             res.status(500).json({ message: "Internal server error" });
         }
     },
+
 
     getProfile: async (req, res) => {
         try {
@@ -284,6 +309,24 @@ const userController = {
                 message: "An error occurred while updating the photo",
                 error,
             });
+        }
+    },
+
+    getAllDentists: async (req, res) => {
+        try {
+            const dentists = await User.find({ role: 'Dentist' }).select('-password');
+
+            if (!dentists || dentists.length === 0) {
+                return res.status(404).json({ message: 'No dentists found' });
+            }
+
+            res.status(200).json({
+                message: 'Dentists fetched successfully',
+                dentists
+            });
+        } catch (err) {
+            console.error("Error fetching dentists:", err);
+            res.status(500).json({ message: "Internal server error" });
         }
     },
 }
