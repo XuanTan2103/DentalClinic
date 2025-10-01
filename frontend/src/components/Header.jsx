@@ -4,12 +4,14 @@ import { Phone } from 'lucide-react';
 import { UserOutlined } from '@ant-design/icons';
 import styles from './Header.module.css';
 import { jwtDecode } from "jwt-decode";
+import BookAppointment from "./BookAppointment";
 
 function Header() {
     const [isSticky, setIsSticky] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLogin, setIsLogin] = useState(false);
     const [user, setUser] = useState(null);
+    const [isOpenBookAppointmentModal, setIsOpenBookAppointmentModal] = useState(false)
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -46,7 +48,8 @@ function Header() {
                         <div className={`${styles.phoneInfo} ${isSticky ? styles.phoneInfoSticky : styles.phoneInfoNormal}`}>
                             <Phone size={18} /> 0909 999 999
                         </div>
-                        <button className={`${styles.ctaButton} ${isSticky ? styles.ctaButtonSticky : styles.ctaButtonNormal}`}>Book Now</button>
+                        <button onClick={() => setIsOpenBookAppointmentModal(true)} className={`${styles.ctaButton} ${isSticky ? styles.ctaButtonSticky : styles.ctaButtonNormal}`}>Book Now</button>
+                        <BookAppointment isOpen={isOpenBookAppointmentModal} onClose={() => setIsOpenBookAppointmentModal(false)} />
                         {isLogin ? (
                             <div className={styles.userInfo} onClick={() => navigate('/profile')}>
                                 <span className={styles.userGreeting}>Hello, {user.fullName}</span>

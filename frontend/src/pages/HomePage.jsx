@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Phone, Mail, MapPin, Star, Award, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, Star, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import styles from './HomePage.module.css';
 import Header from '../components/Header';
 import banner1 from '../assets/banner1.png';
@@ -8,6 +8,7 @@ import banner3 from '../assets/banner3.jpg';
 import banner4 from '../assets/banner4.jpg';
 import banner5 from '../assets/banner5.png';
 import banner6 from '../assets/banner6.png';
+import Award from '../assets/award.gif';
 import about from '../assets/about.png';
 import Chat from '../components/Chat';
 import ChatBot from '../components/ChatBot';
@@ -15,6 +16,34 @@ import ChatBot from '../components/ChatBot';
 function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [openWidget, setOpenWidget] = useState(null);
+
+  const services = [
+    {
+      title: "Check-up",
+      desc: "Regular dental check-ups help detect oral health issues early, ensuring timely treatment and maintaining a healthy smile.",
+      bg: require("../assets/Checkup.png"),
+    },
+    {
+      title: "Treatment",
+      desc: "Comprehensive treatments for cavities, gum disease, and other oral problems to restore comfort and protect your teeth.",
+      bg: require("../assets/Treatment.png"),
+    },
+    {
+      title: "Aesthetics",
+      desc: "Enhance your smile with whitening, veneers, and cosmetic dentistry solutions designed for a brighter and more confident look.",
+      bg: require("../assets/Aesthetics.png"),
+    },
+    {
+      title: "Surgery",
+      desc: "Safe and professional oral surgeries such as wisdom tooth extraction, implants, and minor surgical procedures.",
+      bg: require("../assets/Surgery.png"),
+    },
+    {
+      title: "Orthodontics",
+      desc: "Correct misaligned teeth and bite issues with braces or clear aligners for long-term dental health and aesthetics.",
+      bg: require("../assets/Orthodontics.png"),
+    },
+  ];
 
   const slides = [banner1, banner2, banner3, banner4, banner5, banner6];
   const nextSlide = useCallback(() => setCurrentSlide((prev) => (prev + 1) % slides.length), [slides.length]);
@@ -99,12 +128,18 @@ function HomePage() {
             <p className={styles.servicesDescription}>Comprehensive dental services for all ages, from preventive to cosmetic care.</p>
           </div>
           <div className={styles.servicesGrid}>
-            {['Cleaning', 'Whitening', 'Braces', 'Implants'].map((service, i) => (
-              <div key={i} className={styles.serviceCard}>
-                <Award className={styles.serviceIcon} />
-                <h3 className={styles.serviceTitle}>{service}</h3>
-                <p className={styles.serviceDescription}>Top-notch {service.toLowerCase()} service with care and precision.</p>
-                <a href="/linhtinh" className={styles.serviceLink}>Learn More</a>
+            {services.map((service, i) => (
+              <div
+                key={i}
+                className={styles.serviceCard}
+                style={{ "--bg-image": `url(${service.bg})` }}
+              >
+                <img src={Award} alt="Award icon" className={styles.serviceIcon} />
+                <h3 className={styles.serviceTitle}>{service.title}</h3>
+                <p className={styles.serviceDescription}>{service.desc}</p>
+                <a href="/service" className={styles.serviceLink}>
+                  Learn More
+                </a>
               </div>
             ))}
           </div>
@@ -121,7 +156,7 @@ function HomePage() {
             {['Dr. Smith', 'Dr. Tran', 'Dr. Lee'].map((doc, i) => (
               <div key={i} className={styles.doctorCard}>
                 <div className={styles.doctorImageContainer}>
-                  <img src={`/doctor${i + 1}.jpg`} alt={doc} className={styles.doctorImage} />
+                  <img src={banner6} alt={doc} className={styles.doctorImage} />
                   <div className={styles.doctorImageOverlay}></div>
                 </div>
                 <div className={styles.doctorInfo}>

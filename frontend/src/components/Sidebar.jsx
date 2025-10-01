@@ -1,15 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.css';
-import { Users, BarChart3, Settings, FileText, Mail, ChevronLeft, ChevronRight, LogOut, User, ScrollText } from "lucide-react";
+import { Users, BarChart3, Settings, FileText, Mail, ChevronLeft, ChevronRight, LogOut, User, ScrollText, Calendar1 } from "lucide-react";
 import Swal from "sweetalert2";
-import { jwtDecode } from 'jwt-decode';
+import axios from 'axios';
+
+const adminItems = [
+    { icon: BarChart3, label: "Dashboard", href: "/dashboard" },
+    { icon: Users, label: "Accounts", href: "/accounts" },
+    { icon: ScrollText, label: "Services", href: "/manage-service" },
+    { icon: Calendar1, label: "Dentist working time", href: "/dentist-working-time" },
+    { icon: FileText, label: "Báo cáo", href: "/reports" },
+    { icon: Settings, label: "Cài đặt", href: "/settings" },
+];
+
+const staffItems = [
+    { icon: BarChart3, label: "Dashboard", href: "/dashboard" },
+    { icon: Users, label: "Accounts", href: "/accounts" },
+    { icon: FileText, label: "Báo cáo", href: "/reports" },
+    { icon: Mail, label: "Messenger", href: "/messenger" },
+    { icon: Settings, label: "Cài đặt", href: "/settings" },
+];
+
+const dentistItems = [
+    { icon: BarChart3, label: "Dashboard", href: "/dashboard" },
+    { icon: Users, label: "Accounts", href: "/accounts" },
+    { icon: FileText, label: "Báo cáo", href: "/reports" },
+    { icon: Settings, label: "Cài đặt", href: "/settings" },
+];
 
 function Sidebar() {
     const [collapsed, setCollapsed] = useState(false);
     const location = useLocation();
     const [user, setUser] = useState(null);
+    const [menuItems, setMenuItems] = useState([]);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user) {
+            if (user.role === "Admin") {
+                setMenuItems(adminItems);
+            } else if (user.role === "Staff") {
+                setMenuItems(staffItems);
+            } else {
+                setMenuItems(dentistItems);
+            }
+        }
+    }, [user]);
 
     const onToggle = () => {
         setCollapsed(!collapsed);
@@ -33,27 +70,23 @@ function Sidebar() {
         });
     }
 
-    const menuItems = [
-        { icon: BarChart3, label: "Dashboard", href: "/dashboard" },
-        { icon: Users, label: "Accounts", href: "/accounts" },
-        { icon: ScrollText, label: "Services", href: "/manage-service" },
-        { icon: FileText, label: "Báo cáo", href: "/reports" },
-        { icon: Mail, label: "Messenger", href: "/messenger" },
-        { icon: Settings, label: "Cài đặt", href: "/settings" },
-    ];
-
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            try {
-                const decoded = jwtDecode(token);
-                setUser(decoded);
-            } catch (error) {
-                console.error("Invalid token:", error);
-                setUser(null);
-            }
-        }
+        fetchPforile();
     }, []);
+
+    const fetchPforile = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`http://localhost:5000/user/profile`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setUser(response.data.user);
+        } catch (error) {
+            console.error("Error fetching profile:", error);
+        }
+    }
 
     return (
         <div className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}>

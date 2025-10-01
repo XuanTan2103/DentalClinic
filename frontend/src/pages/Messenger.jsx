@@ -43,7 +43,13 @@ const Messenger = () => {
         const res = await axios.get("http://localhost:5000/conversation/all-conversation", {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
-        setContacts(res.data.conversations || []);
+        const conversations = res.data.conversations || [];
+        const enhanced = conversations.map(c => ({
+          ...c,
+          lastMessageTime: c.lastMessageCreatedAt || c.lastMessage?.createdAt || c.updatedAt
+        }));
+
+        setContacts(enhanced);
       } catch (err) {
         console.error("Failed to load conversations:", err);
       }
@@ -70,14 +76,25 @@ const Messenger = () => {
       });
 
       setContacts(prev =>
-        prev.map(c => String(c._id) === String(conversationId) ? { ...c, unreadCount: 0 } : c)
+        prev.map(c =>
+          String(c._id) === String(conversationId)
+            ? { ...c, unreadCount: 0 }
+            : c
+        )
       );
 
-      setMessages(prev => prev.map(m => String(m.sender?._id) !== String(myId) ? { ...m, isRead: true } : m));
+      setMessages(prev =>
+        prev.map(m =>
+          String(m.sender?._id) !== String(myId)
+            ? { ...m, isRead: true }
+            : m
+        )
+      );
     } catch (err) {
       console.error("Failed to mark messages as read:", err);
     }
   }, [myId]);
+
 
   const handleSendMessage = async () => {
     if (messageInput.trim() && selectedChat) {
@@ -109,12 +126,20 @@ const Messenger = () => {
 
     const onNewMessage = (newMessage) => {
       if (String(newMessage.conversation) === String(selectedChatRef.current)) {
-        setMessages(prev => prev.some(m => m._id === newMessage._id) ? prev : [...prev, newMessage]);
+        setMessages(prev =>
+          prev.some(m => m._id === newMessage._id) ? prev : [...prev, newMessage]
+        );
 
         setContacts(prevContacts =>
           prevContacts.map(contact =>
             String(contact._id) === String(newMessage.conversation)
-              ? { ...contact, unreadCount: 0 }
+              ? {
+                ...contact,
+                unreadCount: 0,
+                lastMessage: newMessage.content || newMessage.text,
+                lastMessageSender: newMessage.sender?._id,
+                lastMessageTime: newMessage.createdAt || contact.lastMessageTime
+              }
               : contact
           )
         );
@@ -126,7 +151,13 @@ const Messenger = () => {
           if (found) {
             return prevContacts.map(c =>
               String(c._id) === String(newMessage.conversation)
-                ? { ...c, unreadCount: (c.unreadCount || 0) + 1, lastMessage: newMessage.content || newMessage.text, lastMessageSender: newMessage.sender?._id }
+                ? {
+                  ...c,
+                  unreadCount: (c.unreadCount || 0) + 1,
+                  lastMessage: newMessage.content || newMessage.text,
+                  lastMessageSender: newMessage.sender?._id,
+                  lastMessageTime: newMessage.createdAt || c.lastMessageTime
+                }
                 : c
             ).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
           } else {
@@ -136,6 +167,7 @@ const Messenger = () => {
               customerAvatar: '',
               lastMessage: newMessage.content || newMessage.text,
               lastMessageSender: newMessage.sender?._id || null,
+              lastMessageTime: newMessage.createdAt,
               unreadCount: 1,
               updatedAt: new Date().toISOString(),
             };
@@ -148,14 +180,19 @@ const Messenger = () => {
     const onConversationUpdate = (updatedConversation) => {
       setContacts(prevContacts => {
         const updatedContacts = prevContacts.map(contact =>
-          String(contact._id) === String(updatedConversation._id) ? updatedConversation : contact
+          String(contact._id) === String(updatedConversation._id)
+            ? { ...contact, ...updatedConversation }
+            : contact
         );
+
         if (!updatedContacts.find(c => String(c._id) === String(updatedConversation._id))) {
           updatedContacts.unshift(updatedConversation);
         }
+
         return updatedContacts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
       });
     };
+
 
     socket.on("newMessage", onNewMessage);
     socket.on("conversationUpdate", onConversationUpdate);
@@ -225,6 +262,9 @@ const Messenger = () => {
                     {String(contact.lastMessageSender) === String(myId)
                       ? `You: ${contact.lastMessage || ''}`
                       : contact.lastMessage || ''}
+                    <div className={styles.time}>{contact.lastMessageTime
+                      ? new Date(contact.lastMessageTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                      : ''}</div>
                   </div>
                 </div>
               </div>
@@ -261,24 +301,35 @@ const Messenger = () => {
 
               <div className={styles.messagesContainer}>
                 {messages.map((message) => {
-                  const isMine = String(message.sender?._id) === String(myId);
+                  const senderId = message.sender?._id || message.sender;
+                  const isMine = String(senderId) === String(myId);
                   const current = contacts.find(c => String(c._id) === String(selectedChat));
-                  const avatarSrc = current?.customerAvatar;
+                  const avatarSrc = message.sender?.avatar || current?.customerAvatar;
+
                   return (
                     <div
                       key={message._id}
-                      className={`${styles.message} ${isMine ? styles.messageSent : styles.messageReceived}`}
-                    >
+                      className={`${styles.message} ${isMine ? styles.messageSent : styles.messageReceived}`}>
                       {!isMine && (
-                        avatarSrc ? (
-                          <img src={avatarSrc} alt={current?.customerName || ''} className={styles.messageAvatarImg} />
-                        ) : (
-                          <div className={styles.messageAvatar}>👤</div>
-                        )
+                        <div className={styles.messageAvatarWrapper}>
+                          {avatarSrc ? (
+                            <img
+                              src={avatarSrc}
+                              alt={message.sender?.fullName || current?.customerName || 'User'}
+                              className={styles.messageAvatarImg}
+                            />
+                          ) : (
+                            <div className={styles.messageAvatar}>👤</div>
+                          )}
+                        </div>
                       )}
+
                       <div className={styles.messageContent}>
+                        {!isMine && message.sender?.fullName && (
+                          <div className={styles.messageSenderName}>{message.sender.fullName}</div>
+                        )}
+
                         <div className={styles.messageBubble}>{message.content || message.text}</div>
-                        <div className={styles.messageTime}>{message.time || ''}</div>
                       </div>
                     </div>
                   );
