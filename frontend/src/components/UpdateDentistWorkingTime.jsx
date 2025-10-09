@@ -22,9 +22,11 @@ const UpdateDentistWorkingTime = ({ isOpenUpdate, onClose, onSuccess, openNotifi
         if (isOpenUpdate && schedule) {
             setFormData({
                 dentistId: schedule.dentistId?._id || schedule.dentistId || '',
-                date: schedule.date
-                    ? new Date(schedule.date).toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' })
-                    : '',
+                date: schedule.isFixed
+                    ? ''
+                    : (schedule.date
+                        ? new Date(schedule.date).toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' })
+                        : ''),
                 workingDays: schedule.workingDays || [],
                 morning: schedule.morning || { startTime: '', endTime: '' },
                 afternoon: schedule.afternoon || { startTime: '', endTime: '' },
@@ -44,18 +46,19 @@ const UpdateDentistWorkingTime = ({ isOpenUpdate, onClose, onSuccess, openNotifi
                 afternoon: value ? { startTime: "", endTime: "" } : prev.afternoon,
                 workingDays: value ? [] : prev.workingDays,
             }));
-        } else {
+        } else if (field === "isFixed") {
             setFormData(prev => ({
                 ...prev,
-                [field]: value
+                isFixed: value,
+                date: value ? "" : prev.date,
+                workingDays: value ? prev.workingDays : [],
             }));
+        } else {
+            setFormData(prev => ({ ...prev, [field]: value }));
         }
 
         if (errors[field]) {
-            setErrors(prev => ({
-                ...prev,
-                [field]: ''
-            }));
+            setErrors(prev => ({ ...prev, [field]: '' }));
         }
     };
 
@@ -277,7 +280,7 @@ const UpdateDentistWorkingTime = ({ isOpenUpdate, onClose, onSuccess, openNotifi
                     )}
 
                     {/* Working Days Selection - Only show if fixed */}
-                    {!formData.isClosed && (
+                    {formData.isFixed && !formData.isClosed && (
                         <div className={styles.formGroup}>
                             <label className={styles.label}>
                                 <Calendar size={16} />

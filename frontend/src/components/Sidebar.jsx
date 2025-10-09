@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.css';
-import { Users, BarChart3, Settings, FileText, Mail, ChevronLeft, ChevronRight, LogOut, User, ScrollText, Calendar1 } from "lucide-react";
+import { Users, BarChart3, Settings, FileText, Mail, ChevronLeft, ChevronRight, LogOut, User, ScrollText, Calendar1, CalendarCheck } from "lucide-react";
 import Swal from "sweetalert2";
 import axios from 'axios';
 
@@ -10,6 +10,7 @@ const adminItems = [
     { icon: Users, label: "Accounts", href: "/accounts" },
     { icon: ScrollText, label: "Services", href: "/manage-service" },
     { icon: Calendar1, label: "Dentist working time", href: "/dentist-working-time" },
+    { icon: CalendarCheck, label: "Appointment", href: "/appointment" },
     { icon: FileText, label: "Báo cáo", href: "/reports" },
     { icon: Settings, label: "Cài đặt", href: "/settings" },
 ];
@@ -17,14 +18,18 @@ const adminItems = [
 const staffItems = [
     { icon: BarChart3, label: "Dashboard", href: "/dashboard" },
     { icon: Users, label: "Accounts", href: "/accounts" },
-    { icon: FileText, label: "Báo cáo", href: "/reports" },
     { icon: Mail, label: "Messenger", href: "/messenger" },
+    { icon: CalendarCheck, label: "Appointment", href: "/appointment" },
+    { icon: ScrollText, label: "Services", href: "/manage-service" },
+    { icon: FileText, label: "Báo cáo", href: "/reports" },
     { icon: Settings, label: "Cài đặt", href: "/settings" },
 ];
 
 const dentistItems = [
     { icon: BarChart3, label: "Dashboard", href: "/dashboard" },
     { icon: Users, label: "Accounts", href: "/accounts" },
+    { icon: CalendarCheck, label: "Appointment", href: "/appointment" },
+    { icon: ScrollText, label: "Services", href: "/manage-service" },
     { icon: FileText, label: "Báo cáo", href: "/reports" },
     { icon: Settings, label: "Cài đặt", href: "/settings" },
 ];
