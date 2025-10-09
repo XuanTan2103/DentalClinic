@@ -329,6 +329,24 @@ const userController = {
             res.status(500).json({ message: "Internal server error" });
         }
     },
+
+    getAllCustomers: async (req, res) => {
+        try {
+            const customers = await User.find({ role: 'Customer' }).select('-password');
+
+            if (!customers || customers.length === 0) {
+                return res.status(404).json({ message: 'No customers found' });
+            }
+
+            res.status(200).json({
+                message: 'Customers fetched successfully',
+                customers
+            });
+        } catch (err) {
+            console.error("Error fetching customers:", err);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    },
 }
 
 module.exports = userController;

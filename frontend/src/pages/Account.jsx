@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import styles from "./Account.module.css";
 import Sidebar from "../components/Sidebar";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 import { notification } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import Swal from "sweetalert2";
@@ -21,6 +22,14 @@ function Account() {
     const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
     const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState(null);
+    const [role, setRole] = useState(null);
+
+    const token = localStorage.getItem('token');
+    useEffect(() => {
+        if (!token) return;
+        const decoded = jwtDecode(token);
+        setRole(decoded.role);
+    }, [token]);
 
     const filteredUsers = users.filter((user) => {
         const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -276,7 +285,7 @@ function Account() {
                                     <th>Gender</th>
                                     <th>Address</th>
                                     <th>Status</th>
-                                    <th>Action</th>
+                                    {!(role === 'Dentist' || role === 'Staff') && <th>Action</th>}
                                 </tr>
                             </thead>
                             <tbody>
@@ -306,6 +315,7 @@ function Account() {
                                                 {user.isActive ? "Active" : "Inactive"}
                                             </span>
                                         </td>
+                                        {!(role === 'Dentist' || role === 'Staff') &&(
                                         <td>
                                             <div className={styles.actionContainer} ref={activeDropdown === user._id ? dropdownRef : null}>
                                                 <button
@@ -383,6 +393,7 @@ function Account() {
                                                 )}
                                             </div>
                                         </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>

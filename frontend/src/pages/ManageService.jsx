@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react"
 import styles from "./ManageService.module.css"
 import Sidebar from "../components/Sidebar"
-import axios from "axios"
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 import { notification } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import ConfirmDelete from "../components/ConfirmDelete"
@@ -17,7 +18,15 @@ function ManageService() {
   const [api, contextHolder] = notification.useNotification();
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false)
-  const [selectedService, setSelectedService] = useState(null)
+  const [selectedService, setSelectedService] = useState(null);
+  const [role, setRole] = useState(null);
+  
+  const token = localStorage.getItem('token');
+  useEffect(() => {
+    if (!token) return;
+    const decoded = jwtDecode(token);
+    setRole(decoded.role);
+  }, [token]);
 
   const handleEdit = (service) => {
     setSelectedService(service)
@@ -240,7 +249,7 @@ function ManageService() {
                   <th>Price</th>
                   <th>Duration</th>
                   <th>Guarantee</th>
-                  <th>Action</th>
+                  {!(role === 'Dentist' || role === 'Staff') && <th>Action</th>}
                 </tr>
               </thead>
               <tbody>
@@ -266,6 +275,7 @@ function ManageService() {
                       <span className={styles.duration}>{service.duration} minutes</span>
                     </td>
                     <td className={styles.guarantee}>{service.guarantee}</td>
+                    {!(role === 'Dentist' || role === 'Staff') && (
                     <td>
                       <div className={styles.actionContainer} ref={activeDropdown === service._id ? dropdownRef : null}>
                         <button
@@ -331,6 +341,7 @@ function ManageService() {
                         )}
                       </div>
                     </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

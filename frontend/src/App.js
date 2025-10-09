@@ -14,6 +14,7 @@ import Profile from './pages/Profile';
 import About from './pages/About';
 import ForgotPassword from './pages/ForgotPassword';
 import DentistWorkingTime from './pages/DentistWorkingTime';
+import Appointment from './pages/Appointment';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/dentist-working-time" element={<DentistWorkingTime />} />
+          <Route path="/appointment" element={<Appointment />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

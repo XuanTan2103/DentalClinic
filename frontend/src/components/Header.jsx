@@ -5,14 +5,37 @@ import { UserOutlined } from '@ant-design/icons';
 import styles from './Header.module.css';
 import { jwtDecode } from "jwt-decode";
 import BookAppointment from "./BookAppointment";
+import { notification } from 'antd';
+import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 
 function Header() {
     const [isSticky, setIsSticky] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLogin, setIsLogin] = useState(false);
     const [user, setUser] = useState(null);
-    const [isOpenBookAppointmentModal, setIsOpenBookAppointmentModal] = useState(false)
+    const [isOpenBookAppointmentModal, setIsOpenBookAppointmentModal] = useState(false);
+    const [api, contextHolder] = notification.useNotification();
     const navigate = useNavigate();
+
+    const openNotification = (type, detailMessage = "") => {
+        if (type === "success") {
+            api.open({
+                message: "Action successful!",
+                description: detailMessage,
+                showProgress: true,
+                pauseOnHover: true,
+                icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+            });
+        } else {
+            api.open({
+                message: "Action failed!",
+                description: detailMessage,
+                showProgress: true,
+                pauseOnHover: true,
+                icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
+            });
+        }
+    };
 
     useEffect(() => {
         const handleScroll = () => setIsSticky(window.scrollY > 0);
@@ -33,6 +56,7 @@ function Header() {
 
     return (
         <header className={`${styles.header} ${isSticky ? styles.headerSticky : styles.headerNormal}`}>
+            {contextHolder}
             <div className={styles.headerContainer}>
                 <div className={styles.headerContent}>
                     <div className={styles.logoContainer}>
@@ -49,7 +73,7 @@ function Header() {
                             <Phone size={18} /> 0909 999 999
                         </div>
                         <button onClick={() => setIsOpenBookAppointmentModal(true)} className={`${styles.ctaButton} ${isSticky ? styles.ctaButtonSticky : styles.ctaButtonNormal}`}>Book Now</button>
-                        <BookAppointment isOpen={isOpenBookAppointmentModal} onClose={() => setIsOpenBookAppointmentModal(false)} />
+                        <BookAppointment isOpen={isOpenBookAppointmentModal} onClose={() => setIsOpenBookAppointmentModal(false)} openNotification={openNotification}/>
                         {isLogin ? (
                             <div className={styles.userInfo} onClick={() => navigate('/profile')}>
                                 <span className={styles.userGreeting}>Hello, {user.fullName}</span>

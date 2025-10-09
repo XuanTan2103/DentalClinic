@@ -54,6 +54,13 @@ const CreateDentistWorkingTime = ({ isOpen, onClose, onSuccess, openNotification
                 afternoon: { startTime: "", endTime: "" },
                 workingDays: [],
             }));
+        } else if (field === "isFixed") {
+            setFormData(prev => ({
+                ...prev,
+                isFixed: value,
+                date: value ? "" : prev.date,
+                workingDays: value ? prev.workingDays : [],
+            }));
         } else {
             setFormData(prev => ({
                 ...prev,
@@ -294,7 +301,7 @@ const CreateDentistWorkingTime = ({ isOpen, onClose, onSuccess, openNotification
                     )}
 
                     {/* Working Days Selection - Only show if fixed */}
-                    {!formData.isClosed && (
+                    {formData.isFixed && !formData.isClosed && (
                         <div className={styles.formGroup}>
                             <label className={styles.label}>
                                 <Calendar size={16} />

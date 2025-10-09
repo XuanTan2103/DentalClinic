@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Filter, Plus, Edit, Trash2, Calendar } from 'lucide-react';
+import { Search, Filter, Plus, Edit, Trash2, Calendar1, Calendar } from 'lucide-react';
 import styles from './DentistWorkingTime.module.css';
 import Sidebar from '../components/Sidebar';
 import axios from 'axios';
@@ -129,7 +129,7 @@ const DentistWorkingTime = () => {
                 {/* Header */}
                 <div className={styles.header}>
                     <div className={styles.headerContent}>
-                        <Calendar size={32} />
+                        <Calendar1 size={32} />
                         <h1 className={styles.headerTitle}>Doctor's Work Schedule Management</h1>
                     </div>
                     <p className={styles.headerSubtitle}>Manage working hours for all dentists in the clinic</p>
