@@ -104,7 +104,7 @@
 
 .listHeader {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr 0.7fr 1fr 0.6fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   gap: 1rem;
   padding: 1rem 1.5rem;
   background: hsl(210, 25%, 94%);
@@ -117,7 +117,7 @@
 
 .appointmentItem {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr 0.7fr 1fr 0.6fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   gap: 1rem;
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid hsl(215, 20%, 88%);
@@ -140,6 +140,8 @@
 }
 
 .email {
+  word-break: break-all;
+  max-width: 100%;
   font-size: 0.875rem;
   color: hsl(215, 15%, 50%);
   margin-top: 0.25rem;
@@ -208,7 +210,6 @@
 .actions {
   display: flex;
   gap: 0.5rem;
-  justify-content: flex-end;
 }
 
 .actionButton {
@@ -308,28 +309,6 @@
   font-weight: 600;
   color: #374151;
   white-space: nowrap;
-}
-
-.filterSelect {
-  padding: 10px 16px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #374151;
-  background-color: white;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 160px;
-}
-
-.filterSelect:hover {
-  border-color: #3b82f6;
-}
-
-.filterSelect:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 /* Reject Modal Styles */
@@ -501,10 +480,6 @@
   .filterGroup {
     flex-direction: column;
     align-items: stretch;
-  }
-
-  .filterSelect {
-    width: 100%;
   }
 }
 

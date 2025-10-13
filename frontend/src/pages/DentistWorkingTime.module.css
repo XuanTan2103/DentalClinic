@@ -70,7 +70,7 @@
 
 .searchInput {
     width: 100%;
-    padding: 12px 12px 12px 44px;
+    padding: 11px 12px 11px 44px;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     box-sizing: border-box;
@@ -86,29 +86,8 @@
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
-.filterContainer {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background-color: white;
-    padding: 12px 16px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.filterIcon {
-    color: #6b7280;
-}
-
-.filterSelect {
-    border: none;
-    background: none;
-    font-size: 14px;
-    color: #374151;
-    cursor: pointer;
-    outline: none;
-    min-width: 120px;
+.filterSelect{
+    height: 40px;
 }
 
 .addButton {
@@ -118,7 +97,7 @@
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
     border: none;
-    padding: 12px 20px;
+    padding: 10px 15px;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 600;

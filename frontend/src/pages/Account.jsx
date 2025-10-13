@@ -3,7 +3,7 @@ import styles from "./Account.module.css";
 import Sidebar from "../components/Sidebar";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-import { notification } from 'antd';
+import { notification, Select } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import Swal from "sweetalert2";
 import { LockKeyhole, KeyRound } from 'lucide-react';
@@ -166,7 +166,8 @@ function Account() {
                         <h1 className={styles.title}>User Management</h1>
                         <p className={styles.subtitle}>Manage user accounts and permissions</p>
                     </div>
-                    <button onClick={() => setIsModalCreateOpen(true)} className={styles.addButton}>+ Add user</button>
+                    {!(role === 'Dentist' || role === 'Staff') && 
+                    <button onClick={() => setIsModalCreateOpen(true)} className={styles.addButton}>+ Add user</button>}
                     <CreateUser isOpen={isModalCreateOpen} onSuccess={() => { fetchUsers() }} onClose={() => setIsModalCreateOpen(false)} openNotification={openNotification} />
                 </div>
 
@@ -262,14 +263,18 @@ function Account() {
                                 >
                                     <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
                                 </svg>
-                                <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)} className={styles.filterSelect}>
-                                    <option value="">All</option>
-                                    {[...new Set(users.map((user) => user.role))].map((role) => (
-                                        <option key={role} value={role}>
-                                            {role}
-                                        </option>
-                                    ))}
-                                </select>
+                                <Select
+                                    style={{ width: 100 }}
+                                    value={filterRole}
+                                    onChange={(value) => setFilterRole(value)}
+                                    options={[
+                                        { value: "", label: "All" },
+                                        ...Array.from(new Set(users.map(u => u.role))).map(role => ({
+                                            value: role,
+                                            label: role,
+                                        }))
+                                    ]}
+                                />
                             </div>
                         </div>
                     </div>
@@ -315,66 +320,32 @@ function Account() {
                                                 {user.isActive ? "Active" : "Inactive"}
                                             </span>
                                         </td>
-                                        {!(role === 'Dentist' || role === 'Staff') &&(
-                                        <td>
-                                            <div className={styles.actionContainer} ref={activeDropdown === user._id ? dropdownRef : null}>
-                                                <button
-                                                    className={styles.actionButton}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setActiveDropdown(activeDropdown === user._id ? null : user._id)
-                                                    }}
-                                                >
-                                                    <svg
-                                                        width="16"
-                                                        height="16"
-                                                        viewBox="0 0 24 24"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        strokeWidth="2"
+                                        {!(role === 'Dentist' || role === 'Staff') && (
+                                            <td>
+                                                <div className={styles.actionContainer} ref={activeDropdown === user._id ? dropdownRef : null}>
+                                                    <button
+                                                        className={styles.actionButton}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setActiveDropdown(activeDropdown === user._id ? null : user._id)
+                                                        }}
                                                     >
-                                                        <circle cx="12" cy="12" r="1" />
-                                                        <circle cx="12" cy="5" r="1" />
-                                                        <circle cx="12" cy="19" r="1" />
-                                                    </svg>
-                                                </button>
-                                                {activeDropdown === user._id && (
-                                                    <div className={styles.dropdown}>
-                                                        <button className={styles.dropdownItem}>
-                                                            <svg
-                                                                width="14"
-                                                                height="14"
-                                                                viewBox="0 0 24 24"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                strokeWidth="2"
-                                                            >
-                                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                                            </svg>
-                                                            Edit
-                                                        </button>
-                                                        <button className={styles.dropdownItem} onClick={() => handleStatusToggle(user._id, user.isActive)}>
-                                                            {user.isActive ? (
-                                                                <>
-                                                                    <LockKeyhole className={styles.iconLockAccount} size={14} color="currentColor" />
-                                                                    Lock{" "}
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <KeyRound className={styles.iconUnlockAccount} size={14} color="green" />
-                                                                    Unlock{" "}
-                                                                </>
-                                                            )}
-                                                        </button>
-                                                        <ConfirmDelete
-                                                            title="Confirm user deletion"
-                                                            description={`Are you sure you want to delete user ${user.fullName}? This action cannot be undone.`}
-                                                            itemName={user.fullName}
-                                                            onConfirm={() => handleDelete(user._id)}>
-                                                            <button
-                                                                className={`${styles.dropdownItem} ${styles.deleteItem}`}
-                                                            >
+                                                        <svg
+                                                            width="16"
+                                                            height="16"
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            strokeWidth="2"
+                                                        >
+                                                            <circle cx="12" cy="12" r="1" />
+                                                            <circle cx="12" cy="5" r="1" />
+                                                            <circle cx="12" cy="19" r="1" />
+                                                        </svg>
+                                                    </button>
+                                                    {activeDropdown === user._id && (
+                                                        <div className={styles.dropdown}>
+                                                            <button className={styles.dropdownItem}>
                                                                 <svg
                                                                     width="14"
                                                                     height="14"
@@ -383,16 +354,50 @@ function Account() {
                                                                     stroke="currentColor"
                                                                     strokeWidth="2"
                                                                 >
-                                                                    <polyline points="3,6 5,6 21,6" />
-                                                                    <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6" />
+                                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                                                                 </svg>
-                                                                Delete
+                                                                Edit
                                                             </button>
-                                                        </ConfirmDelete>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </td>
+                                                            <button className={styles.dropdownItem} onClick={() => handleStatusToggle(user._id, user.isActive)}>
+                                                                {user.isActive ? (
+                                                                    <>
+                                                                        <LockKeyhole className={styles.iconLockAccount} size={14} color="currentColor" />
+                                                                        Lock{" "}
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <KeyRound className={styles.iconUnlockAccount} size={14} color="green" />
+                                                                        Unlock{" "}
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                            <ConfirmDelete
+                                                                title="Confirm user deletion"
+                                                                description={`Are you sure you want to delete user ${user.fullName}? This action cannot be undone.`}
+                                                                itemName={user.fullName}
+                                                                onConfirm={() => handleDelete(user._id)}>
+                                                                <button
+                                                                    className={`${styles.dropdownItem} ${styles.deleteItem}`}
+                                                                >
+                                                                    <svg
+                                                                        width="14"
+                                                                        height="14"
+                                                                        viewBox="0 0 24 24"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        strokeWidth="2"
+                                                                    >
+                                                                        <polyline points="3,6 5,6 21,6" />
+                                                                        <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6" />
+                                                                    </svg>
+                                                                    Delete
+                                                                </button>
+                                                            </ConfirmDelete>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
                                         )}
                                     </tr>
                                 ))}

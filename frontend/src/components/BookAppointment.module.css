@@ -387,14 +387,7 @@
 /* Select Input */
 .selectInput {
     width: 100%;
-    padding: 12px 16px;
-    border: 2px solid #e5e7eb;
-    border-radius: 10px;
-    font-size: 14px;
-    color: #1f2937;
-    transition: all 0.2s;
-    background: white;
-    cursor: pointer;
+    height: 40px;
 }
 
 .selectInput:focus {
@@ -406,7 +399,7 @@
 /* Date Input */
 .dateInput {
     width: 100%;
-    padding: 12px 16px;
+    padding: 10px 16px;
     border: 2px solid #e5e7eb;
     border-radius: 10px;
     font-size: 14px;

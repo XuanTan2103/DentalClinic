@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Filter, Plus, Edit, Trash2, Calendar1, Calendar } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Calendar1, Calendar } from 'lucide-react';
 import styles from './DentistWorkingTime.module.css';
 import Sidebar from '../components/Sidebar';
 import axios from 'axios';
-import { notification } from 'antd';
+import { jwtDecode } from 'jwt-decode';
+import { notification, Select } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import ConfirmDelete from "../components/ConfirmDelete";
 import CreateDentistWorkingTime from '../components/CreateDentistWorkingTime';
@@ -18,6 +19,14 @@ const DentistWorkingTime = () => {
     const [isOpenUpdateDentistWorkingTimeModal, setIsOpenUpdateDentistWorkingTimeModal] = useState(false);
     const [selectedDentistWorkingTime, setSelectedDentistWorkingTime] = useState(null);
     const [selectedDentist, setSelectedDentist] = useState("all");
+    const [role, setRole] = useState(null);
+
+    const token = localStorage.getItem('token');
+    useEffect(() => {
+        if (!token) return;
+        const decoded = jwtDecode(token);
+        setRole(decoded.role);
+    }, [token]);
 
     const dayShortMap = { 1: "Sunday", 2: "Monday", 3: "Tuesday", 4: "Wednesday", 5: "Thursday", 6: "Friday", 7: "Saturday" };
 
@@ -148,22 +157,21 @@ const DentistWorkingTime = () => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <div className={styles.filterContainer}>
-                            <Filter size={20} className={styles.filterIcon} />
-                            <select
-                                className={styles.filterSelect}
-                                value={selectedDentist}
-                                onChange={(e) => setSelectedDentist(e.target.value)}
-                            >
-                                <option value="all">All dentists</option>
-                                {uniqueDentists.map(dentist => (
-                                    <option key={dentist?._id} value={dentist?._id}>
-                                        {dentist?.fullName}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <button onClick={() => setIsOpenCreateDentistWorkingTimeModal(true)} className={styles.addButton}> <Plus size={20} /> Add calendar </button>
+                        <Select
+                            className={styles.filterSelect}
+                            style={{ width: 220 }}
+                            value={selectedDentist}
+                            onChange={(value) => setSelectedDentist(value)}
+                            options={[
+                                { value: "all", label: "All dentists" },
+                                ...uniqueDentists.map(dentist => ({
+                                    value: dentist?._id,
+                                    label: dentist?.fullName,
+                                }))
+                            ]}
+                        />
+                        {!(role === 'Staff') &&
+                            <button onClick={() => setIsOpenCreateDentistWorkingTimeModal(true)} className={styles.addButton}> <Plus size={20} /> Add calendar </button>}
                         <CreateDentistWorkingTime isOpen={isOpenCreateDentistWorkingTimeModal} onSuccess={() => { fetchDentistWorkingTimes() }} onClose={() => setIsOpenCreateDentistWorkingTimeModal(false)} openNotification={openNotification} />
                         <UpdateDentistWorkingTime
                             schedule={selectedDentistWorkingTime}
@@ -193,7 +201,8 @@ const DentistWorkingTime = () => {
                                     <th className={styles.tableHeader}>Morning shift</th>
                                     <th className={styles.tableHeader}>Afternoon shift</th>
                                     <th className={styles.tableHeader}>Working days</th>
-                                    <th className={styles.tableHeader}>Action</th>
+                                    {!(role === 'Staff') &&
+                                        <th className={styles.tableHeader}>Action</th>}
                                 </tr>
                             </thead>
                             <tbody>
@@ -225,20 +234,22 @@ const DentistWorkingTime = () => {
                                                     ))}
                                                 </div>
                                             </td>
-                                            <td className={styles.tableCell}>
-                                                <div className={styles.actionButtons}>
-                                                    <button onClick={() => handleEdit(schedule)} className={styles.editButton}> <Edit size={16} /> </button>
-                                                    <ConfirmDelete
-                                                        title="Confirm deletion"
-                                                        description={`Are you sure you want to delete dentist ${schedule.dentistId.fullName}'s fixed working time? This action cannot be undone.`}
-                                                        itemName={schedule.dentistId.fullName}
-                                                        onConfirm={() => handleDelete(schedule)}>
-                                                        <button className={styles.deleteButton}>
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    </ConfirmDelete>
-                                                </div>
-                                            </td>
+                                            {!(role === 'Staff') &&
+                                                <td className={styles.tableCell}>
+                                                    <div className={styles.actionButtons}>
+                                                        <button onClick={() => handleEdit(schedule)} className={styles.editButton}> <Edit size={16} /> </button>
+                                                        <ConfirmDelete
+                                                            title="Confirm deletion"
+                                                            description={`Are you sure you want to delete dentist ${schedule.dentistId.fullName}'s fixed working time? This action cannot be undone.`}
+                                                            itemName={schedule.dentistId.fullName}
+                                                            onConfirm={() => handleDelete(schedule)}>
+                                                            <button className={styles.deleteButton}>
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </ConfirmDelete>
+                                                    </div>
+                                                </td>
+                                            }
                                         </tr>
                                     ))
                                 ) : (
@@ -270,7 +281,8 @@ const DentistWorkingTime = () => {
                                     <th className={styles.tableHeader}>Date</th>
                                     <th className={styles.tableHeader}>Morning shift</th>
                                     <th className={styles.tableHeader}>Afternoon shift</th>
-                                    <th className={styles.tableHeader}>Action</th>
+                                    {!(role === 'Staff') &&
+                                        <th className={styles.tableHeader}>Action</th>}
                                 </tr>
                             </thead>
                             <tbody>
@@ -298,24 +310,26 @@ const DentistWorkingTime = () => {
                                                     ? `${schedule.afternoon.startTime} - ${schedule.afternoon.endTime}`
                                                     : "Not working"}
                                             </td>
-                                            <td className={styles.tableCell}>
-                                                <div className={styles.actionButtons}>
-                                                    <button onClick={() => handleEdit(schedule)} className={styles.editButton}>
-                                                        <Edit size={16} />
-                                                    </button>
-                                                    <ConfirmDelete
-                                                        title="Confirm dentist working time deletion"
-                                                        description={`Are you sure you want to delete dentist ${schedule.dentistId.fullName}'s special working time? This action cannot be undone.`}
-                                                        itemName={schedule.dentistId.fullName}
-                                                        onConfirm={() => handleDelete(schedule)}>
-                                                        <button
-                                                            className={styles.deleteButton}
-                                                        >
-                                                            <Trash2 size={16} />
+                                            {!(role === 'Staff') &&
+                                                <td className={styles.tableCell}>
+                                                    <div className={styles.actionButtons}>
+                                                        <button onClick={() => handleEdit(schedule)} className={styles.editButton}>
+                                                            <Edit size={16} />
                                                         </button>
-                                                    </ConfirmDelete>
-                                                </div>
-                                            </td>
+                                                        <ConfirmDelete
+                                                            title="Confirm dentist working time deletion"
+                                                            description={`Are you sure you want to delete dentist ${schedule.dentistId.fullName}'s special working time? This action cannot be undone.`}
+                                                            itemName={schedule.dentistId.fullName}
+                                                            onConfirm={() => handleDelete(schedule)}>
+                                                            <button
+                                                                className={styles.deleteButton}
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </ConfirmDelete>
+                                                    </div>
+                                                </td>
+                                            }
                                         </tr>
                                     ))
                                 ) : (

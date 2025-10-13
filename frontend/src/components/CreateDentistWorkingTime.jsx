@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, User } from 'lucide-react';
 import styles from './CreateDentistWorkingTime.module.css';
 import axios from 'axios';
+import { Select } from 'antd';
 
 const CreateDentistWorkingTime = ({ isOpen, onClose, onSuccess, openNotification }) => {
     const [formData, setFormData] = useState({
@@ -166,19 +167,20 @@ const CreateDentistWorkingTime = ({ isOpen, onClose, onSuccess, openNotification
                             <User size={16} />
                             Dentist *
                         </label>
-                        <select
+                        <Select
+                            style={{ }}
                             value={formData.dentistId}
-                            onChange={(e) => handleInputChange('dentistId', e.target.value)}
-                            className={`${styles.select} ${errors.dentistId ? styles.error : ''}`}
+                            onChange={(value) => handleInputChange("dentistId", value)}
+                            className={`${styles.select} ${errors.dentistId ? styles.error : ""}`}
                             disabled={isSubmitting}
-                        >
-                            <option value="">Choose a dentist</option>
-                            {dentists.map((dentist) => (
-                                <option key={dentist._id} value={dentist._id}>
-                                    {dentist.fullName} - {dentist.email}
-                                </option>
-                            ))}
-                        </select>
+                            options={[
+                                { value: "", label: "Choose a dentist" },
+                                ...dentists.map((dentist) => ({
+                                    value: dentist._id,
+                                    label: `${dentist.fullName} - ${dentist.email}`,
+                                })),
+                            ]}
+                        />
                     </div>
 
                     {/* Fixed Working Time Toggle */}

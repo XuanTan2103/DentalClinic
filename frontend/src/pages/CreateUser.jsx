@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styles from './CreateUser.module.css';
 import axios from 'axios';
+import { Select } from 'antd';
 
 
 function CreateUser({ isOpen, onClose, onSuccess, openNotification }) {
@@ -145,18 +146,19 @@ function CreateUser({ isOpen, onClose, onSuccess, openNotification }) {
                             <label className={styles.label} htmlFor="gender">
                                 Gender <span className={styles.star}>*</span>
                             </label>
-                            <select
+                            <Select
                                 id="gender"
                                 name="gender"
                                 value={formData.gender}
-                                onChange={(e) => handleInputChange("gender", e.target.value)}
+                                onChange={(value) => handleInputChange("gender", value)}
                                 className={`${styles.select} ${fieldErrors.gender ? styles.inputError : ""}`}
-                            >
-                                <option value="">Select gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
-                            </select>
+                                options={[
+                                    { value: "", label: "Select gender" },
+                                    { value: "male", label: "Male" },
+                                    { value: "female", label: "Female" },
+                                    { value: "other", label: "Other" },
+                                ]}
+                            />
                         </div>
 
                         <div className={styles.formGroup}>
@@ -177,19 +179,20 @@ function CreateUser({ isOpen, onClose, onSuccess, openNotification }) {
                             <label className={styles.label} htmlFor="role">
                                 Role <span className={styles.star}>*</span>
                             </label>
-                            <select
+                            <Select
                                 id="role"
                                 name="role"
                                 value={formData.role}
-                                onChange={(e) => handleInputChange("role", e.target.value)}
+                                onChange={(value) => handleInputChange("role", value)}
                                 className={`${styles.select} ${fieldErrors.role ? styles.inputError : ""}`}
-                            >
-                                <option value="">Select role</option>
-                                <option value="Admin">Admin</option>
-                                <option value="Staff">Staff</option>
-                                <option value="Dentist">Dentist</option>
-                                <option value="Customer">Customer</option>
-                            </select>
+                                options={[
+                                    { value: "", label: "Select role" },
+                                    { value: "Admin", label: "Admin" },
+                                    { value: "Staff", label: "Staff" },
+                                    { value: "Dentist", label: "Dentist" },
+                                    { value: "Customer", label: "Customer" },
+                                ]}
+                            />
                         </div>
                     </div>
 

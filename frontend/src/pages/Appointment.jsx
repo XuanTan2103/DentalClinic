@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 import { CalendarCheck, Trash2, X } from 'lucide-react';
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
-import { notification } from 'antd';
+import { notification, Select } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import ConfirmDelete from "../components/ConfirmDelete";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -68,25 +68,25 @@ const Appointment = () => {
   };
 
   const fetchAppointments = useCallback(async () => {
-      const token = localStorage.getItem('token');
-      if (!token) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
-      const decoded = jwtDecode(token);
-      setRole(decoded.role);
-      const headers = { Authorization: `Bearer ${token}` };
+    const decoded = jwtDecode(token);
+    setRole(decoded.role);
+    const headers = { Authorization: `Bearer ${token}` };
 
-      try {
-        if (decoded.role === 'Dentist') {
-          const res = await axios.get('http://localhost:5000/appointment/get-appointments-by-dentist', { headers });
-          setAppointments(res.data?.data || []);
-        } else {
-          const res = await axios.get('http://localhost:5000/appointment/get-all-appointments', { headers });
-          setAppointments(res.data?.data || []);
-        }
-      } catch (error) {
-        console.error('Error fetching appointments:', error);
+    try {
+      if (decoded.role === 'Dentist') {
+        const res = await axios.get('http://localhost:5000/appointment/get-appointments-by-dentist', { headers });
+        setAppointments(res.data?.data || []);
+      } else {
+        const res = await axios.get('http://localhost:5000/appointment/get-all-appointments', { headers });
+        setAppointments(res.data?.data || []);
       }
-    },[]);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+    }
+  }, []);
 
   useEffect(() => {
     fetchAppointments();
@@ -190,8 +190,9 @@ const Appointment = () => {
         </div>
 
         <div className={styles.controls}>
-          <button onClick={() => setIsOpenBookAppointmentModal(true)} className={styles.addButton}>Create appointment</button>
-          <BookAppointment isOpen={isOpenBookAppointmentModal} onSuccess={fetchAppointments} onClose={() => setIsOpenBookAppointmentModal(false)} openNotification={openNotification}/>
+          {!(role === 'Dentist') && 
+          <button onClick={() => setIsOpenBookAppointmentModal(true)} className={styles.addButton}>Create appointment</button>}
+          <BookAppointment isOpen={isOpenBookAppointmentModal} onSuccess={fetchAppointments} onClose={() => setIsOpenBookAppointmentModal(false)} openNotification={openNotification} />
         </div>
 
         <div className={styles.filterSection}>
@@ -215,28 +216,29 @@ const Appointment = () => {
           <div className={styles.filterControls}>
             <div className={styles.filterGroup}>
               <label className={styles.filterLabel}>Status:</label>
-              <select
-                className={styles.filterSelect}
+              <Select
+                style={{ width: 120 }}
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="rejected">Rejected</option>
-              </select>
+                onChange={(value) => setStatusFilter(value)}
+                options={[
+                  { value: "all", label: "All Status" },
+                  { value: "pending", label: "Pending" },
+                  { value: "confirmed", label: "Confirmed" },
+                  { value: "rejected", label: "Rejected" },
+                ]}
+              />
             </div>
 
             <div className={styles.filterGroup}>
               <label className={styles.filterLabel}>Sort by:</label>
-              <select
-                className={styles.filterSelect}
+              <Select
                 value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value)}
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-              </select>
+                onChange={(value) => setSortOrder(value)}
+                options={[
+                  { value: "newest", label: "Newest First" },
+                  { value: "oldest", label: "Oldest First" },
+                ]}
+              />
             </div>
           </div>
         </div>

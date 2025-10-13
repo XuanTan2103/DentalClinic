@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.css';
-import { Users, BarChart3, Settings, FileText, Mail, ChevronLeft, ChevronRight, LogOut, User, ScrollText, Calendar1, CalendarCheck } from "lucide-react";
-import Swal from "sweetalert2";
+import { Users, BarChart3, Settings, FileText, Mail, ChevronLeft, ChevronRight, LogOut, User, ScrollText, Calendar1, CalendarCheck, Pill } from "lucide-react";
 import axios from 'axios';
+import ConfirmDialog from './ConfirmDialog';
 
 const adminItems = [
     { icon: BarChart3, label: "Dashboard", href: "/dashboard" },
@@ -11,6 +11,7 @@ const adminItems = [
     { icon: ScrollText, label: "Services", href: "/manage-service" },
     { icon: Calendar1, label: "Dentist working time", href: "/dentist-working-time" },
     { icon: CalendarCheck, label: "Appointment", href: "/appointment" },
+    { icon: Pill, label: "Medicine", href: "/manage-medicine" },
     { icon: FileText, label: "Báo cáo", href: "/reports" },
     { icon: Settings, label: "Cài đặt", href: "/settings" },
 ];
@@ -19,8 +20,10 @@ const staffItems = [
     { icon: BarChart3, label: "Dashboard", href: "/dashboard" },
     { icon: Users, label: "Accounts", href: "/accounts" },
     { icon: Mail, label: "Messenger", href: "/messenger" },
+    { icon: Calendar1, label: "Dentist working time", href: "/dentist-working-time" },
     { icon: CalendarCheck, label: "Appointment", href: "/appointment" },
     { icon: ScrollText, label: "Services", href: "/manage-service" },
+    { icon: Pill, label: "Medicine", href: "/manage-medicine" },
     { icon: FileText, label: "Báo cáo", href: "/reports" },
     { icon: Settings, label: "Cài đặt", href: "/settings" },
 ];
@@ -30,6 +33,7 @@ const dentistItems = [
     { icon: Users, label: "Accounts", href: "/accounts" },
     { icon: CalendarCheck, label: "Appointment", href: "/appointment" },
     { icon: ScrollText, label: "Services", href: "/manage-service" },
+    { icon: Pill, label: "Medicine", href: "/manage-medicine" },
     { icon: FileText, label: "Báo cáo", href: "/reports" },
     { icon: Settings, label: "Cài đặt", href: "/settings" },
 ];
@@ -58,21 +62,8 @@ function Sidebar() {
     };
 
     const handleLogout = () => {
-        Swal.fire({
-            title: "Are you sure?",
-            text: "You will be logged out of the system.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, logout",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                localStorage.removeItem("token");
-                navigate("/");
-                Swal.fire("Logged out!", "You have been logged out successfully.", "success");
-            }
-        });
+        localStorage.removeItem("token");
+        navigate("/");
     }
 
     useEffect(() => {
@@ -149,9 +140,14 @@ function Sidebar() {
                         </div>
                     )}
                     {!collapsed && (
-                        <button onClick={handleLogout} className={styles.logoutButton} title="Logout">
+                        <ConfirmDialog
+                          title="Confirm logout"
+                          description={`Are you sure you want to Logout?`}
+                          onConfirm={() => handleLogout()}>
+                        <button className={styles.logoutButton} title="Logout">
                             <LogOut size={18} />
                         </button>
+                        </ConfirmDialog>
                     )}
                 </div>
             </div>

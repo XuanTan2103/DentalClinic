@@ -3,7 +3,7 @@ import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "./BookAppointment.module.css";
-import { TimePicker } from "antd";
+import { TimePicker, Select } from "antd";
 import dayjs from "dayjs";
 import { jwtDecode } from "jwt-decode";
 import { X } from "lucide-react";
@@ -175,14 +175,14 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                     { ...payload, customerId: selectedCustomer },
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
-                openNotification("success", "Tạo lịch hẹn cho khách hàng thành công!");
+                openNotification("success", "Create appointments for customers successfully!");
             } else {
                 await axios.post(
                     "http://localhost:5000/appointment/create-appointment",
                     payload,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
-                openNotification("success", "Đặt lịch thành công! Vui lòng kiểm tra email khi lịch được xác nhận.");
+                openNotification("success", "Booking successful! Please check your email once your appointment is confirmed.");
             }
             setSelectedServices([]);
             setSelectedDentist("");
@@ -213,7 +213,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                             <line x1="8" y1="2" x2="8" y2="6"></line>
                             <line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
-                        Đặt Lịch Khám
+                        Book an Appointment
                     </h2>
                     <button className={styles.closeBtn} onClick={onClose}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -231,7 +231,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                     <circle cx="12" cy="7" r="4"></circle>
                                 </svg>
-                                <h3>Chọn khách hàng</h3>
+                                <h3>Select customers</h3>
                             </div>
 
                             {/* Autocomplete Customer Search */}
@@ -244,7 +244,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                                     <input
                                         type="text"
                                         className={styles.searchInput}
-                                        placeholder="Tìm kiếm khách hàng..."
+                                        placeholder="Find customers..."
                                         value={customerSearch}
                                         onChange={(e) => {
                                             setCustomerSearch(e.target.value);
@@ -275,7 +275,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                                                 </div>
                                             ))
                                         ) : (
-                                            <div className={styles.dropdownNoResults}>Không tìm thấy khách hàng</div>
+                                            <div className={styles.dropdownNoResults}>No customers found</div>
                                         )}
                                     </div>
                                 )}
@@ -289,7 +289,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                             <svg className={styles.sectionIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
                             </svg>
-                            <h3>Chọn Dịch Vụ</h3>
+                            <h3>Select Service</h3>
                         </div>
 
                         {/* Search Input */}
@@ -301,7 +301,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                             <input
                                 type="text"
                                 className={styles.searchInput}
-                                placeholder="Tìm kiếm dịch vụ..."
+                                placeholder="Search for services..."
                                 value={serviceSearch}
                                 onChange={(e) => setServiceSearch(e.target.value)}
                             />
@@ -310,7 +310,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                         {/* Services List */}
                         <div className={styles.servicesList}>
                             {filteredServices.length === 0 ? (
-                                <div className={styles.noResults}>Không tìm thấy dịch vụ</div>
+                                <div className={styles.noResults}>No service found</div>
                             ) : (
                                 filteredServices.map(s => (
                                     <label key={s._id} className={styles.serviceItem}>
@@ -327,7 +327,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                                                     <circle cx="12" cy="12" r="10"></circle>
                                                     <polyline points="12 6 12 12 16 14"></polyline>
                                                 </svg>
-                                                {s.duration} phút
+                                                {s.duration} minute
                                             </span>
                                         </div>
                                     </label>
@@ -337,8 +337,8 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
 
                         {selectedServices.length > 0 && (
                             <div className={styles.selectedServicesInfo}>
-                                <span className={styles.infoLabel}>Đã chọn: {selectedServices.length} dịch vụ</span>
-                                <span className={styles.infoLabel}>Tổng thời gian: {getTotalDuration()} phút</span>
+                                <span className={styles.infoLabel}>Selected: {selectedServices.length} service</span>
+                                <span className={styles.infoLabel}>Total time: {getTotalDuration()} minute</span>
                             </div>
                         )}
                     </div>
@@ -350,18 +350,20 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
-                            <h3>Chọn Bác Sĩ</h3>
+                            <h3>Choose a Dentist</h3>
                         </div>
-                        <select
+                        <Select
                             className={styles.selectInput}
                             value={selectedDentist}
-                            onChange={e => setSelectedDentist(e.target.value)}
-                        >
-                            <option value="">-- Chọn bác sĩ --</option>
-                            {dentists.map(d => (
-                                <option key={d._id} value={d._id}>{d.fullName}</option>
-                            ))}
-                        </select>
+                            onChange={(value) => setSelectedDentist(value)}
+                            options={[
+                                { value: "", label: "-- Choose a Dentist --" },
+                                ...dentists.map(d => ({
+                                    value: d._id,
+                                    label: d.fullName,
+                                }))
+                            ]}
+                        />
                     </div>
 
                     {/* Date Section */}
@@ -373,13 +375,13 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                                 <line x1="8" y1="2" x2="8" y2="6"></line>
                                 <line x1="3" y1="10" x2="21" y2="10"></line>
                             </svg>
-                            <h3>Chọn Ngày</h3>
+                            <h3>Select Date</h3>
                         </div>
                         <DatePicker
                             selected={date}
                             onChange={(d) => setDate(d)}
                             filterDate={isWorkingDay}
-                            placeholderText="Chọn ngày làm việc"
+                            placeholderText="Select working day"
                             dateFormat="dd/MM/yyyy"
                             className={styles.dateInput}
                             minDate={new Date()}
@@ -394,7 +396,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <polyline points="12 6 12 12 16 14"></polyline>
                                 </svg>
-                                <h3>Giờ Trống Của Bác Sĩ</h3>
+                                <h3>Dentist's Free Time</h3>
                             </div>
                             <div className={styles.freeTimeRanges}>
                                 {freeTimes.map((range, idx) => (
@@ -418,11 +420,11 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <polyline points="12 6 12 12 16 14"></polyline>
                                 </svg>
-                                <h3>Thời Gian Khám</h3>
+                                <h3>Examination Time</h3>
                             </div>
                             <div className={styles.timeRow}>
                                 <div className={styles.timeGroup}>
-                                    <label className={styles.timeLabel}>Giờ Bắt Đầu</label>
+                                    <label className={styles.timeLabel}>Start Time</label>
                                     <TimePicker
                                         className={styles.timeInput}
                                         minuteStep={5}
@@ -446,10 +448,10 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                                             </svg>
                                         </div>
                                         <div className={styles.timeGroup}>
-                                            <label className={styles.timeLabel}>Giờ Kết Thúc</label>
+                                            <label className={styles.timeLabel}>End Time</label>
                                             <div className={styles.endTimeBox}>
                                                 <span className={styles.endTimeText}>{calculateEndTime()}</span>
-                                                <span className={styles.durationBadge}>{getTotalDuration()} phút</span>
+                                                <span className={styles.durationBadge}>{getTotalDuration()} minute</span>
                                             </div>
                                         </div>
                                     </>
@@ -468,11 +470,11 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                                 <line x1="16" y1="17" x2="8" y2="17"></line>
                                 <polyline points="10 9 9 9 8 9"></polyline>
                             </svg>
-                            <h3>Ghi Chú</h3>
+                            <h3>Note</h3>
                         </div>
                         <textarea
                             className={styles.noteTextarea}
-                            placeholder="Nhập ghi chú của bạn (nếu có)..."
+                            placeholder="Enter your notes (if any)..."
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
                             rows="4"
@@ -482,7 +484,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
 
                 <div className={styles.modalFooter}>
                     <button className={styles.btnSecondary} onClick={onClose}>
-                        Hủy
+                        Cancel
                     </button>
                     <button
                         className={styles.btnPrimary}
@@ -495,7 +497,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                             (isStaff && !selectedCustomer)
                         }
                     >
-                        Xác Nhận Đặt Lịch
+                        Confirm Appointment
                     </button>
                 </div>
             </div>
