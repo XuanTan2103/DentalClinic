@@ -6,7 +6,7 @@ import axios from "axios";
 import { notification } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { LogOut } from "lucide-react";
-import Swal from "sweetalert2";
+import ConfirmDialog from "../components/ConfirmDialog";
 import UpdateProfile from "./UpdateProfile";
 import UpdatePhoto from "../components/UpdatePhoto";
 
@@ -58,21 +58,8 @@ function Profile() {
     }
 
     const handleLogout = () => {
-        Swal.fire({
-            title: "Are you sure?",
-            text: "You will be logged out of the system.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, logout",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                localStorage.removeItem("token");
-                navigate("/");
-                Swal.fire("Logged out!", "You have been logged out successfully.", "success");
-            }
-        });
+        localStorage.removeItem("token");
+        navigate("/");
     };
 
     const medicalRecords = [
@@ -189,7 +176,12 @@ function Profile() {
                         <button className={styles.changePasswordBtn} onClick={() => navigate('/change-password')}>Change password</button>
                         <button className={styles.editProfileBtn} onClick={() => setOpenUpdateModal(true)}>Update profile</button>
                         <UpdateProfile user={user} isOpen={openUpdateModal} onClose={() => setOpenUpdateModal(false)} openNotification={openNotification} onSuccess={() => { fetchPforile() }} />
-                        <button className={styles.logoutBtn} onClick={handleLogout}><LogOut size={16} />Logout</button>
+                        <ConfirmDialog
+                            title="Confirm logout"
+                            description={`Are you sure you want to Logout?`}
+                            onConfirm={() => handleLogout()}>
+                            <button className={styles.logoutBtn} ><LogOut size={16} />Logout</button>
+                        </ConfirmDialog>
                     </div>
                 </div>
 

@@ -1,6 +1,7 @@
 import { useState, useRef } from "react"
 import styles from "./CreateService.module.css"
 import axios from "axios"
+import { Select } from "antd";
 
 function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
   const [formData, setFormData] = useState({
@@ -182,19 +183,20 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
               <label htmlFor="type" className={styles.label}>
                 Type service <span className={styles.star}>*</span>
               </label>
-              <select
+              <Select
                 id="type"
                 value={formData.type}
-                onChange={(e) => handleInputChange("type", e.target.value)}
+                onChange={(value) => handleInputChange("type", value)}
                 className={`${styles.select} ${fieldErrors.type ? styles.inputError : ""}`}
-              >
-                <option value="">Select service type</option>
-                <option value="Check-up">Check-up</option>
-                <option value="Treatment">Treatment</option>
-                <option value="Aesthetics">Aesthetics</option>
-                <option value="Surgery">Surgery</option>
-                <option value="Orthodontics">Orthodontics</option>
-              </select>
+                options={[
+                  { value: "", label: "Select service type" },
+                  { value: "Check-up", label: "Check-up" },
+                  { value: "Treatment", label: "Treatment" },
+                  { value: "Aesthetics", label: "Aesthetics" },
+                  { value: "Surgery", label: "Surgery" },
+                  { value: "Orthodontics", label: "Orthodontics" },
+                ]}
+              />
             </div>
 
             <div className={styles.formGroup}>

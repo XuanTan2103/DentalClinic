@@ -13,10 +13,10 @@ function UserProfile({ isOpen, onClose, userId }) {
   const getRoleDisplayName = (role) => {
     const r = (role || "").toLowerCase();
     switch (r) {
-      case "admin": return "Quản trị viên";
-      case "staff": return "Nhân viên";
-      case "dentist": return "Nha sĩ";
-      case "customer": return "Khách hàng";
+      case "admin": return "Admin";
+      case "staff": return "Staff";
+      case "dentist": return "Dentist";
+      case "customer": return "Customer";
       default: return role;
     }
   };
@@ -66,7 +66,7 @@ function UserProfile({ isOpen, onClose, userId }) {
         {Icon && <Icon className={styles.iconSmall} />}
         <span>{label}</span>
       </div>
-      <div className={styles.infoValue}>{value || "Chưa cập nhật"}</div>
+      <div className={styles.infoValue}>{value || "Not updated yet"}</div>
     </div>
   );
 
@@ -164,7 +164,7 @@ function UserProfile({ isOpen, onClose, userId }) {
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <div className={styles.loadingContainer}>
             <div className={styles.spinner}></div>
-            <p>Đang tải thông tin...</p>
+            <p>Loading information...</p>
           </div>
         </div>
       </div>
@@ -177,7 +177,7 @@ function UserProfile({ isOpen, onClose, userId }) {
       <div className={styles.overlay} onClick={onClose}>
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <div className={styles.errorContainer}>
-            <p>Không tìm thấy người dùng</p>
+            <p>User not found</p>
           </div>
         </div>
       </div>
@@ -188,7 +188,7 @@ function UserProfile({ isOpen, onClose, userId }) {
     <div className={styles.section}>
       <div className={styles.sectionHeader}>
         <UserIcon className={styles.sectionIcon} />
-        <h3>Thông tin cơ bản</h3>
+        <h3>Basic information</h3>
       </div>
 
       <div className={styles.profileHeader}>
@@ -209,24 +209,24 @@ function UserProfile({ isOpen, onClose, userId }) {
         />
         <InfoRow
           icon={Phone}
-          label="Số điện thoại"
+          label="Phone number"
           value={user.phone}
         />
         <InfoRow
           icon={Calendar}
-          label="Ngày sinh"
+          label="Date of Birth"
           value={formatDate(user.dateOfBirth)}
         />
         <InfoRow
           icon={UserIcon}
-          label="Giới tính"
-          value={user.gender === "male" ? "Nam" : user.gender === "female" ? "Nữ" : "Khác"}
+          label="Gender"
+          value={user.gender === "male" ? "Male" : user.gender === "female" ? "Female" : "Other"}
         />
       </div>
 
       <InfoRow
         icon={MapPin}
-        label="Địa chỉ"
+        label="Address"
         value={user.address}
         fullWidth
       />
@@ -237,37 +237,37 @@ function UserProfile({ isOpen, onClose, userId }) {
     <div className={styles.section}>
       <div className={styles.sectionHeader}>
         <Heart className={styles.sectionIcon} />
-        <h3>Thông tin y tế</h3>
+        <h3>Medical information</h3>
       </div>
 
       <div className={styles.infoGrid}>
         <InfoRow
           icon={Pill}
-          label="Dị ứng"
+          label="Allergy"
           value={user.medicalHistory?.allergies?.length > 0
             ? user.medicalHistory.allergies.join(", ")
-            : "Không có"}
+            : "Do not have"}
         />
         <InfoRow
           icon={Pill}
-          label="Thuốc hiện tại"
+          label="Current medications"
           value={user.medicalHistory?.currentMedications?.length > 0
             ? user.medicalHistory.currentMedications.join(", ")
-            : "Không có"}
+            : "Do not have"}
         />
         <InfoRow
           icon={Calendar}
-          label="Lần khám cuối"
+          label="Last visit"
           value={user.medicalHistory?.lastVisit
             ? formatDate(user.medicalHistory.lastVisit)
-            : "Chưa có"}
+            : "Not yet"}
         />
         <InfoRow
           icon={Calendar}
-          label="Lịch hẹn tiếp theo"
+          label="Next appointment"
           value={user.medicalHistory?.nextAppointment
             ? formatDate(user.medicalHistory.nextAppointment)
-            : "Chưa có"}
+            : "Not yet"}
         />
       </div>
 
@@ -275,21 +275,21 @@ function UserProfile({ isOpen, onClose, userId }) {
         <div className={styles.treatmentsSection}>
           <div className={styles.subsectionHeader}>
             <FileText className={styles.iconSmall} />
-            <h4>Lịch sử điều trị</h4>
+            <h4>Treatment history</h4>
           </div>
           <div className={styles.treatmentsList}>
             {user.medicalHistory.previousTreatments.map((treatment, index) => (
               <div key={index} className={styles.treatmentCard}>
                 <div className={styles.treatmentHeader}>
                   <span className={styles.treatmentTitle}>
-                    {treatment.treatment || treatment.title || "Điều trị"}
+                    {treatment.treatment || treatment.title || "Treatment"}
                   </span>
                   <span className={styles.treatmentDate}>
                     {formatDate(treatment.date)}
                   </span>
                 </div>
                 <div className={styles.treatmentDentist}>
-                  Nha sĩ: {treatment.dentist || treatment.doctor || "-"}
+                  Dentist: {treatment.dentist || treatment.doctor || "-"}
                 </div>
                 {treatment.notes && (
                   <div className={styles.treatmentNotes}>{treatment.notes}</div>
@@ -306,30 +306,30 @@ function UserProfile({ isOpen, onClose, userId }) {
     <div className={styles.section}>
       <div className={styles.sectionHeader}>
         <Stethoscope className={styles.sectionIcon} />
-        <h3>Thông tin chuyên môn</h3>
+        <h3>Professional information</h3>
       </div>
 
       <div className={styles.infoGrid}>
         <InfoRow
           icon={Stethoscope}
-          label="Chuyên khoa"
+          label="Specialization"
           value={user.professionalInfo?.specialization}
         />
         <InfoRow
           icon={Clock}
-          label="Kinh nghiệm"
+          label="Experience Years"
           value={user.professionalInfo?.experienceYears
-            ? `${user.professionalInfo.experienceYears} năm`
+            ? `${user.professionalInfo.experienceYears} years`
             : null}
         />
         <InfoRow
           icon={GraduationCap}
-          label="Học vấn"
+          label="Education"
           value={user.professionalInfo?.education}
         />
         <InfoRow
           icon={Award}
-          label="Giải thưởng"
+          label="Awards"
           value={user.professionalInfo?.awards}
         />
       </div>
@@ -338,7 +338,7 @@ function UserProfile({ isOpen, onClose, userId }) {
         <div className={styles.biographySection}>
           <div className={styles.subsectionHeader}>
             <UserIcon className={styles.iconSmall} />
-            <h4>Tiểu sử</h4>
+            <h4>Biography</h4>
           </div>
           <div className={styles.biographyText}>
             {user.professionalInfo.biography}
@@ -350,13 +350,13 @@ function UserProfile({ isOpen, onClose, userId }) {
 
   const WorkingSchedule = () => {
     const daysOfWeek = {
-      1: "Chủ Nhật",
-      2: "Thứ Hai",
-      3: "Thứ Ba",
-      4: "Thứ Tư",
-      5: "Thứ Năm",
-      6: "Thứ Sáu",
-      7: "Thứ Bảy",
+      1: "Sunday",
+      2: "Monday",
+      3: "Tuesday",
+      4: "Wednesday",
+      5: "Thursday",
+      6: "Friday",
+      7: "Saturday",
     };
 
     const workingTime = user.workingTime;
@@ -366,35 +366,35 @@ function UserProfile({ isOpen, onClose, userId }) {
         <div className={styles.section}>
           <div className={styles.sectionHeader}>
             <CalendarDays className={styles.sectionIcon} />
-            <h3>Lịch làm việc</h3>
+            <h3>Work schedule</h3>
           </div>
-          <div className={styles.emptyState}>Chưa có lịch làm việc</div>
+          <div className={styles.emptyState}>No work schedule yet</div>
         </div>
       );
     }
 
-    const days = workingTime.workingDays.map((d) => daysOfWeek[d] || `Ngày ${d}`);
+    const days = workingTime.workingDays.map((d) => daysOfWeek[d] || `Day ${d}`);
 
     return (
       <div className={styles.section}>
         <div className={styles.sectionHeader}>
           <CalendarDays className={styles.sectionIcon} />
-          <h3>Lịch làm việc cố định</h3>
+          <h3>Fixed work schedule</h3>
         </div>
 
         <div className={styles.scheduleRow}>
           <div>
             <Clock className={styles.scheduleIcon} />
-            <span>Giờ làm việc:</span>
+            <span>Working time:</span>
           </div>
           {workingTime.morning?.startTime && workingTime.morning?.endTime && (
             <div>
-              <span>Sáng: {workingTime.morning.startTime} - {workingTime.morning.endTime}</span>
+              <span>Morning: {workingTime.morning.startTime} - {workingTime.morning.endTime}</span>
             </div>
           )}
           {workingTime.afternoon?.startTime && workingTime.afternoon?.endTime && (
             <div>
-              <span>Chiều: {workingTime.afternoon.startTime} - {workingTime.afternoon.endTime}</span>
+              <span>Afternoon: {workingTime.afternoon.startTime} - {workingTime.afternoon.endTime}</span>
             </div>
           )}
         </div>
@@ -402,7 +402,7 @@ function UserProfile({ isOpen, onClose, userId }) {
         <div className={styles.scheduleRow}>
           <div>
             <CalendarDays className={styles.scheduleIcon} />
-            <span>Ngày trong tuần:</span>
+            <span>Day of the week:</span>
           </div>
           <div>
             <span>{days.join(", ")}</span>
@@ -421,14 +421,14 @@ function UserProfile({ isOpen, onClose, userId }) {
             onClick={() => setActiveTab("basic")}
           >
             <UserIcon className={styles.tabIcon} />
-            <span>Thông tin cơ bản</span>
+            <span>Basic information</span>
           </button>
           <button
             className={`${styles.tab} ${activeTab === "medical" ? styles.tabActive : ""}`}
             onClick={() => setActiveTab("medical")}
           >
             <Heart className={styles.tabIcon} />
-            <span>Thông tin y tế</span>
+            <span>Medical information</span>
           </button>
         </>
       );
@@ -442,21 +442,21 @@ function UserProfile({ isOpen, onClose, userId }) {
             onClick={() => setActiveTab("basic")}
           >
             <UserIcon className={styles.tabIcon} />
-            <span>Thông tin cơ bản</span>
+            <span>Basic information</span>
           </button>
           <button
             className={`${styles.tab} ${activeTab === "professional" ? styles.tabActive : ""}`}
             onClick={() => setActiveTab("professional")}
           >
             <Briefcase className={styles.tabIcon} />
-            <span>Thông tin chuyên môn</span>
+            <span>Professional information</span>
           </button>
           <button
             className={`${styles.tab} ${activeTab === "schedule" ? styles.tabActive : ""}`}
             onClick={() => setActiveTab("schedule")}
           >
             <CalendarDays className={styles.tabIcon} />
-            <span>Lịch làm việc</span>
+            <span>Work schedule</span>
           </button>
         </>
       );
@@ -483,7 +483,7 @@ function UserProfile({ isOpen, onClose, userId }) {
         </button>
 
         <div className={styles.modalHeader}>
-          <h2>Thông tin người dùng</h2>
+          <h2>User information</h2>
         </div>
 
         {hasMultipleTabs && (

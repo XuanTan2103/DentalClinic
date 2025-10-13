@@ -11,6 +11,8 @@ const messageRoutes = require("./routes/message");
 const dentistProfileRoutes = require("./routes/dentistProfile");
 const dentistWorkingTimeRoutes = require("./routes/dentistWorkingTime");
 const appointmentRoutes = require("./routes/appointment");
+const medicineCategoryRoutes = require('./routes/medicineCategory');
+const medicineRoutes = require('./routes/medicine');
 const initSocket = require("./config/socket");
 
 const app = express();
@@ -37,6 +39,8 @@ app.use('/message', messageRoutes);
 app.use('/dentistProfile', dentistProfileRoutes);
 app.use('/dentistWorkingTime', dentistWorkingTimeRoutes);
 app.use('/appointment', appointmentRoutes);
+app.use('/medicineCategory', medicineCategoryRoutes);
+app.use('/medicine', medicineRoutes);
 
 const server = http.createServer(app);
 const io = initSocket(server);

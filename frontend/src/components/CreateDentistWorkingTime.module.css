@@ -108,10 +108,14 @@
 }
 
 /* Input Styles */
-.input,
-.select {
+.select{
   width: 100%;
-  padding: 12px;
+  height: 40px;
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
   box-sizing: border-box;
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -120,10 +124,9 @@
   transition: all 0.2s ease;
 }
 
-.input:focus,
-.select:focus {
+.input:focus  {
   outline: none;
-  border-color: #10b981;
+  border-color: #10b981; 
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
