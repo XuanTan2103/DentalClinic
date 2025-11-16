@@ -385,6 +385,256 @@
   font-size: 14px;
 }
 
+/* Empty State */
+.emptyState {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+    font-size: 16px;
+    background: #f9f9f9;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+.emptyState p {
+    margin: 0;
+    font-weight: 500;
+}
+
+.statusBadge.completed {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #4ade80;
+}
+
+.statusBadge.inprogess {
+    background-color: #fef3c7;
+    color: #d97706;
+    border: 1px solid #fbbf24;
+}
+
+.statusBadge.cancelled {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #f87171;
+}
+
+/* Appointment Status Styles */
+.appointmentStatus.confirmed {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    border: 1px solid #60a5fa;
+}
+
+.appointmentStatus.pending {
+    background-color: #fef3c7;
+    color: #d97706;
+    border: 1px solid #fbbf24;
+}
+
+.appointmentStatus.rejected {
+    background-color: #fce7f3;
+    color: #be185d;
+    border: 1px solid #f472b6;
+}
+
+/* Scrollbar Custom cho lists */
+.recordsList::-webkit-scrollbar,
+.appointmentsList::-webkit-scrollbar {
+    width: 8px;
+}
+
+.recordsList::-webkit-scrollbar-track,
+.appointmentsList::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.recordsList::-webkit-scrollbar-thumb,
+.appointmentsList::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.recordsList::-webkit-scrollbar-thumb:hover,
+.appointmentsList::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Cải thiện recordNote - thêm nhiều style hơn */
+.recordNote {
+    margin-top: 12px;
+    padding: 12px;
+    background: #f1f5f9;
+    border-radius: 8px;
+    border-left: 4px solid #3b82f6;
+}
+
+.recordNote .noteLabel {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.recordNote .noteText {
+    color: #475569;
+    line-height: 1.6;
+}
+
+/* Responsive improvements cho mobile */
+@media (max-width: 768px) {
+    .recordHeader,
+    .appointmentHeader {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .statusBadge,
+    .appointmentStatus {
+        align-self: flex-start;
+        margin-top: 8px;
+    }
+    
+    .recordDetails {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .appointmentDateTime {
+        flex-wrap: wrap;
+    }
+}
+
+/* Bill Section Styles */
+.billSection {
+    margin-top: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 12px;
+    border: 2px solid #bae6fd;
+}
+
+.billHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #7dd3fc;
+}
+
+.billTitle {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #0c4a6e;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.billStatus {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.billStatus.paid {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #4ade80;
+}
+
+.billStatus.pending {
+    background-color: #fef3c7;
+    color: #d97706;
+    border: 1px solid #fbbf24;
+}
+
+.billStatus.cancelled {
+    background-color: #fce7f3;
+    color: #be185d;
+    border: 1px solid #f472b6;
+}
+
+.billDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.billRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 14px;
+}
+
+.billRow.billTotal {
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 2px dashed #7dd3fc;
+}
+
+.billLabel {
+    color: #0c4a6e;
+    font-weight: 500;
+}
+
+.billValue {
+    color: #0f172a;
+    font-weight: 500;
+}
+
+.billDiscount {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+.billFinalAmount {
+    color: #0c4a6e;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* Payment Status Badge Variants */
+.statusBadge.paid,
+.appointmentStatus.paid {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #4ade80;
+}
+
+/* Responsive for Bill Section */
+@media (max-width: 768px) {
+    .billSection {
+        padding: 12px;
+    }
+    
+    .billHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .billStatus {
+        align-self: flex-start;
+    }
+    
+    .billRow {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .billFinalAmount {
+        font-size: 16px;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {

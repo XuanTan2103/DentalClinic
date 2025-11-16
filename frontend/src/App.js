@@ -11,11 +11,16 @@ import Messenger from './pages/Messenger';
 import ChangePassword from './auth/ChangePassword';
 import ChangePasswordFirstLogin from './auth/ChangePasswordFirstLogin';
 import Profile from './pages/Profile';
-import About from './pages/About';
 import ForgotPassword from './pages/ForgotPassword';
 import DentistWorkingTime from './pages/DentistWorkingTime';
 import Appointment from './pages/Appointment';
 import ManageMedicine from './pages/ManageMedicine';
+import MedicalRecord from './pages/MedicalRecord';
+import Promotion from './pages/Promotion';
+import Payment from './pages/Payment';
+import DentistProfile from './pages/DentistProfile';
+import Review from './pages/Review';
+import Service from './pages/Service';
 
 function App() {
   return (
@@ -32,12 +37,17 @@ function App() {
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/change-pasword-first-login" element={<ChangePasswordFirstLogin />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/about" element={<About />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/dentist-working-time" element={<DentistWorkingTime />} />
           <Route path="/appointment" element={<Appointment />} />
           <Route path="/manage-medicine" element={<ManageMedicine />} />
+          <Route path="/medical-record" element={<MedicalRecord />} />
+          <Route path="/promotion" element={<Promotion />} />
+          <Route path="/payment" element={<Payment />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/dentist-profile" element={<DentistProfile />} />
+          <Route path="/review" element={<Review />} />
+          <Route path="/service" element={<Service />} />
         </Routes>
       </div>
     </Router>

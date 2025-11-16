@@ -321,12 +321,11 @@ function Account() {
                                             </span>
                                         </td>
                                         {!(role === 'Dentist' || role === 'Staff') && (
-                                            <td>
+                                            <td onClick={(e) => {e.stopPropagation();}}>
                                                 <div className={styles.actionContainer} ref={activeDropdown === user._id ? dropdownRef : null}>
                                                     <button
                                                         className={styles.actionButton}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
+                                                        onClick={() => {
                                                             setActiveDropdown(activeDropdown === user._id ? null : user._id)
                                                         }}
                                                     >

@@ -17,6 +17,9 @@ function Profile() {
     const [openUpdateModal, setOpenUpdateModal] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPhoto, setCurrentPhoto] = useState({});
+    const [medicalRecords, setMedicalRecords] = useState([]);
+    const [appointments, setAppointments] = useState([]);
+    const [bills, setBills] = useState([]);
     const navigate = useNavigate();
 
     const openNotification = (type, detailMessage = "") => {
@@ -40,10 +43,33 @@ function Profile() {
     };
 
     useEffect(() => {
-        fetchPforile();
+        const token = localStorage.getItem("token");
+        Promise.all([
+            axios.get("http://localhost:5000/medicalRecord/get-medical-record-by-customer", {
+                headers: { Authorization: `Bearer ${token}` },
+            }),
+            axios.get("http://localhost:5000/appointment/get-appointments-by-customer", {
+                headers: { Authorization: `Bearer ${token}` },
+            }),
+            axios.get("http://localhost:5000/bill/get-bills-by-customer", {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+        ])
+        .then(([medicalRecordRes, appointmentRes, billRes]) => {
+            setMedicalRecords(medicalRecordRes.data.records || []);
+            setAppointments(appointmentRes.data.data || []);
+            setBills(billRes.data.bills || []);
+        })
+        .catch((err) => {
+            console.error("Error fetching data:", err);
+        });
     }, []);
 
-    const fetchPforile = async () => {
+    useEffect(() => {
+        fetchProfile();
+    }, []);
+
+    const fetchProfile = async () => {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get(`http://localhost:5000/user/profile`, {
@@ -62,71 +88,38 @@ function Profile() {
         navigate("/");
     };
 
-    const medicalRecords = [
-        {
-            id: 1,
-            title: "Tẩy trắng răng",
-            doctor: "Bác sĩ Nguyễn Minh Đức",
-            description: "Tẩy trắng răng toàn hàm bằng công nghệ Zoom WhiteSpeed",
-            date: "2024-03-15",
-            cost: "2,500,000 VND",
-            status: "Hoàn thành",
-            note: "Bệnh nhân cần tránh thức phẩm có màu trong 48h",
-        },
-        {
-            id: 2,
-            title: "Trám răng",
-            doctor: "Bác sĩ Trần Thị Mai",
-            description: "Trám composite răng số 6 hàm dưới",
-            date: "2024-02-20",
-            cost: "800,000 VND",
-            status: "Hoàn thành",
-            note: "Tái khám sau 6 tháng",
-        },
-        {
-            id: 3,
-            title: "Khám tổng quát",
-            doctor: "Bác sĩ Lê Văn Hùng",
-            description: "Khám định kỳ 6 tháng, lấy cao răng",
-            date: "2024-01-10",
-            cost: "500,000 VND",
-            status: "Hoàn thành",
-            note: "Tình trạng răng miệng tốt",
-        },
-    ]
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString("vi-VN");
+    };
 
-    const appointments = [
-        {
-            id: 1,
-            title: "Khám định kỳ",
-            doctor: "Bác sĩ Nguyễn Minh Đức",
-            description: "Khám tổng quát và vệ sinh răng miệng",
-            date: "2024-04-15",
-            time: "09:00",
-            status: "Đã đặt",
-            type: "Khám định kỳ",
-        },
-        {
-            id: 2,
-            title: "Tái khám trám răng",
-            doctor: "Bác sĩ Trần Thị Mai",
-            description: "Kiểm tra tình trạng răng đã trám",
-            date: "2024-04-20",
-            time: "14:30",
-            status: "Chờ xác nhận",
-            type: "Tái khám",
-        },
-        {
-            id: 3,
-            title: "Tư vấn niềng răng",
-            doctor: "Bác sĩ Lê Văn Hùng",
-            description: "Tư vấn phương pháp niềng răng phù hợp",
-            date: "2024-05-05",
-            time: "10:15",
-            status: "Đã đặt",
-            type: "Tư vấn",
-        },
-    ]
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('vi-VN', { 
+            style: 'currency', 
+            currency: 'VND' 
+        }).format(amount);
+    };
+
+    const getStatusClass = (status) => {
+        const statusMap = {
+            'In Progress': 'inprogess',
+            'Completed': 'completed',
+            'Cancelled': 'cancelled',
+            'Paid': 'paid',
+            'Pending': 'pending',
+            'pending': 'pending',
+            'confirmed': 'confirmed',
+            'rejected': 'rejected',
+        };
+        return statusMap[status] || 'pending';
+    };
+
+    const findBillForRecord = (record) => {
+        return bills.find(bill => {
+            const billDate = new Date(bill.createdAt).toDateString();
+            const recordDate = new Date(record.recordDate).toDateString();
+            return billDate === recordDate;
+        });
+    };
 
     return (
         <div>
@@ -142,7 +135,7 @@ function Profile() {
                             isOpen={isModalOpen}
                             onClose={() => setIsModalOpen(false)}
                             currentPhoto={currentPhoto}
-                            onSuccess={(newPhotoUrl) => { setCurrentPhoto(newPhotoUrl); fetchPforile(); }}
+                            onSuccess={(newPhotoUrl) => { setCurrentPhoto(newPhotoUrl); fetchProfile(); }}
                             openNotification={openNotification}
                         />
                     </div>
@@ -175,7 +168,7 @@ function Profile() {
                     <div className={styles.buttonContainer}>
                         <button className={styles.changePasswordBtn} onClick={() => navigate('/change-password')}>Change password</button>
                         <button className={styles.editProfileBtn} onClick={() => setOpenUpdateModal(true)}>Update profile</button>
-                        <UpdateProfile user={user} isOpen={openUpdateModal} onClose={() => setOpenUpdateModal(false)} openNotification={openNotification} onSuccess={() => { fetchPforile() }} />
+                        <UpdateProfile user={user} isOpen={openUpdateModal} onClose={() => setOpenUpdateModal(false)} openNotification={openNotification} onSuccess={() => { fetchProfile() }} />
                         <ConfirmDialog
                             title="Confirm logout"
                             description={`Are you sure you want to Logout?`}
@@ -190,7 +183,7 @@ function Profile() {
                     <div className={styles.recordsHeader}>
                         <h2 className={styles.recordsTitle}>
                             <span className={styles.fileIcon}>📋</span>
-                            {activeView === "records" ? "Hồ Sơ Y Tế" : "Lịch Hẹn"}
+                            {activeView === "records" ? "Medical Records" : "Appointment Schedule"}
                         </h2>
                         <div className={styles.headerButtons}>
                             <button
@@ -198,78 +191,209 @@ function Profile() {
                                 onClick={() => setActiveView("records")}
                             >
                                 <span className={styles.clockIcon}>🕐</span>
-                                Lịch Sử Khám
+                                Medical History
                             </button>
                             <button
                                 className={`${styles.appointmentBtn} ${activeView === "appointments" ? styles.active : ""}`}
                                 onClick={() => setActiveView("appointments")}
                             >
                                 <span className={styles.calendarIcon}>📅</span>
-                                Lịch Hẹn
+                                Appointment Schedule
                             </button>
                         </div>
                     </div>
 
                     {activeView === "records" && (
                         <div className={styles.recordsList}>
-                            {medicalRecords.map((record) => (
-                                <div key={record.id} className={styles.recordCard}>
-                                    <div className={styles.recordHeader}>
-                                        <h3 className={styles.recordTitle}>{record.title}</h3>
-                                        <span className={styles.statusBadge}>{record.status}</span>
-                                    </div>
+                            {medicalRecords.length > 0 ? (
+                                medicalRecords.map((record) => {
+                                    const serviceCost = record.servicesUsed.reduce((sum, service) => 
+                                        sum + (service.serviceId?.price || 0), 0
+                                    );
+                                    
+                                    const bill = findBillForRecord(record);
 
-                                    <p className={styles.doctorName}>{record.doctor}</p>
-                                    <p className={styles.recordDescription}>{record.description}</p>
+                                    return (
+                                        <div key={record._id} className={styles.recordCard}>
+                                            <div className={styles.recordHeader}>
+                                                <h3 className={styles.recordTitle}>
+                                                    {record.chiefComplaint || "See the doctor"}
+                                                </h3>
+                                                <span className={`${styles.statusBadge} ${styles[getStatusClass(record.status)]}`}>
+                                                    {record.status}
+                                                </span>
+                                            </div>
 
-                                    <div className={styles.recordDetails}>
-                                        <div className={styles.recordDate}>
-                                            <span className={styles.dateIcon}>📅</span>
-                                            <span>{record.date}</span>
+                                            <p className={styles.doctorName}>
+                                                Dentist: {record.dentistId?.fullName || "N/A"}
+                                            </p>
+                                            
+                                            {record.diagnosis && record.diagnosis !== "Not available" && (
+                                                <p className={styles.recordDescription}>
+                                                    Diagnose: {record.diagnosis}
+                                                </p>
+                                            )}
+
+                                            <div className={styles.recordDetails}>
+                                                <div className={styles.recordDate}>
+                                                    <span className={styles.dateIcon}>📅</span>
+                                                    <span>{formatDate(record.recordDate)}</span>
+                                                </div>
+                                                <div className={styles.recordCost}>
+                                                    Service Cost: <strong>{formatCurrency(serviceCost)}</strong>
+                                                </div>
+                                            </div>
+
+                                            {/* Services Used */}
+                                            {record.servicesUsed.length > 0 && (
+                                                <div className={styles.recordNote}>
+                                                    <span className={styles.noteLabel}>Services:</span>
+                                                    <span className={styles.noteText}>
+                                                        {record.servicesUsed.map(s => s.serviceId?.name).join(", ")}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* Prescriptions */}
+                                            {record.prescriptions && record.prescriptions.length > 0 && (
+                                                <div className={styles.recordNote}>
+                                                    <span className={styles.noteLabel}>Prescriptions:</span>
+                                                    <span className={styles.noteText}>
+                                                        {record.prescriptions.map(p => 
+                                                            `${p.medicineId?.name} (${p.quantity}) - ${p.instructions}`
+                                                        ).join("; ")}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* Medical History */}
+                                            {record.medicalHistory && record.medicalHistory !== "Not yet" && (
+                                                <div className={styles.recordNote}>
+                                                    <span className={styles.noteLabel}>Medical History:</span>
+                                                    <span className={styles.noteText}>{record.medicalHistory}</span>
+                                                </div>
+                                            )}
+
+                                            {/* Bill Information */}
+                                            {bill && (
+                                                <div className={styles.billSection}>
+                                                    <div className={styles.billHeader}>
+                                                        <h4 className={styles.billTitle}>💳 Payment Information</h4>
+                                                        <span className={`${styles.billStatus} ${styles[getStatusClass(bill.status)]}`}>
+                                                            {bill.status}
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <div className={styles.billDetails}>
+                                                        <div className={styles.billRow}>
+                                                            <span className={styles.billLabel}>Total Amount:</span>
+                                                            <span className={styles.billValue}>{formatCurrency(bill.totalAmount)}</span>
+                                                        </div>
+                                                        
+                                                        {bill.promotion && (
+                                                            <div className={styles.billRow}>
+                                                                <span className={styles.billLabel}>
+                                                                    Promotion ({bill.promotion.name}):
+                                                                </span>
+                                                                <span className={styles.billDiscount}>
+                                                                    -{formatCurrency(bill.discountAmount)}
+                                                                    {bill.promotion.discountType === 'percentage' && 
+                                                                        ` (${bill.promotion.discountValue}%)`
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                        
+                                                        <div className={`${styles.billRow} ${styles.billTotal}`}>
+                                                            <span className={styles.billLabel}>Final Amount:</span>
+                                                            <span className={styles.billFinalAmount}>
+                                                                {formatCurrency(bill.finalAmount)}
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        <div className={styles.billRow}>
+                                                            <span className={styles.billLabel}>Payment Method:</span>
+                                                            <span className={styles.billValue}>{bill.paymentMethod}</span>
+                                                        </div>
+                                                        
+                                                        {bill.staff && (
+                                                            <div className={styles.billRow}>
+                                                                <span className={styles.billLabel}>Processed by:</span>
+                                                                <span className={styles.billValue}>{bill.staff.fullName}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className={styles.recordCost}>
-                                            Chi phí: <strong>{record.cost}</strong>
-                                        </div>
-                                    </div>
-
-                                    <div className={styles.recordNote}>
-                                        <span className={styles.noteLabel}>Ghi chú:</span>
-                                        <span className={styles.noteText}>{record.note}</span>
-                                    </div>
+                                    );
+                                })
+                            ) : (
+                                <div className={styles.emptyState}>
+                                    <p>No medical records available</p>
                                 </div>
-                            ))}
+                            )}
                         </div>
                     )}
 
                     {activeView === "appointments" && (
                         <div className={styles.appointmentsList}>
-                            {appointments.map((appointment) => (
-                                <div key={appointment.id} className={styles.appointmentCard}>
-                                    <div className={styles.appointmentHeader}>
-                                        <h3 className={styles.appointmentTitle}>{appointment.title}</h3>
-                                        <span
-                                            className={`${styles.appointmentStatus} ${styles[appointment.status.replace(/\s+/g, "").toLowerCase()]}`}
-                                        >
-                                            {appointment.status}
-                                        </span>
-                                    </div>
-
-                                    <p className={styles.doctorName}>{appointment.doctor}</p>
-                                    <p className={styles.appointmentDescription}>{appointment.description}</p>
-
-                                    <div className={styles.appointmentDetails}>
-                                        <div className={styles.appointmentDateTime}>
-                                            <span className={styles.dateIcon}>📅</span>
-                                            <span>{appointment.date}</span>
-                                            <span className={styles.timeIcon}>🕐</span>
-                                            <span>{appointment.time}</span>
+                            {appointments.length > 0 ? (
+                                appointments.map((appointment) => (
+                                    <div key={appointment._id} className={styles.appointmentCard}>
+                                        <div className={styles.appointmentHeader}>
+                                            <h3 className={styles.appointmentTitle}>
+                                                {appointment.service.map(s => s.name).join(", ")}
+                                            </h3>
+                                            <span
+                                                className={`${styles.appointmentStatus} ${styles[getStatusClass(appointment.status)]}`}
+                                            >
+                                                {appointment.status}
+                                            </span>
                                         </div>
-                                        <div className={styles.appointmentType}>
-                                            Loại: <strong>{appointment.type}</strong>
+
+                                        <p className={styles.doctorName}>
+                                            Dentist: {appointment.dentist?.fullName || "N/A"}
+                                        </p>
+
+                                        {appointment.note && (
+                                            <p className={styles.appointmentDescription}>{appointment.note}</p>
+                                        )}
+
+                                        <div className={styles.appointmentDetails}>
+                                            <div className={styles.appointmentDateTime}>
+                                                <span className={styles.dateIcon}>📅</span>
+                                                <span>{formatDate(appointment.date)}</span>
+                                                <span className={styles.timeIcon}>🕐</span>
+                                                <span>{appointment.startTime} - {appointment.endTime}</span>
+                                            </div>
                                         </div>
+
+                                        {/* Decision Info */}
+                                        {appointment.decision?.confirmedAt && (
+                                            <div className={styles.recordNote}>
+                                                <span className={styles.noteLabel}>Confirmed by:</span>
+                                                <span className={styles.noteText}>
+                                                    {appointment.decision.confirmedBy?.fullName} - {formatDate(appointment.decision.confirmedAt)}
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        {appointment.decision?.rejectedAt && (
+                                            <div className={styles.recordNote}>
+                                                <span className={styles.noteLabel}>Reason for reject:</span>
+                                                <span className={styles.noteText}>
+                                                    {appointment.decision.rejectReason}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
+                                ))
+                            ) : (
+                                <div className={styles.emptyState}>
+                                    <p>No appointments yet</p>
                                 </div>
-                            ))}
+                            )}
                         </div>
                     )}
                 </div>

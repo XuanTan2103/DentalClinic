@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.css';
-import { Users, BarChart3, Settings, FileText, Mail, ChevronLeft, ChevronRight, LogOut, User, ScrollText, Calendar1, CalendarCheck, Pill } from "lucide-react";
+import { Users, BarChart3, Mailbox, Album, Mail, ChevronLeft, TicketPercent, ChevronRight, LogOut, User, ScrollText, Calendar1, CalendarCheck, Wallet, Pill, ClipboardPlus } from "lucide-react";
 import axios from 'axios';
 import ConfirmDialog from './ConfirmDialog';
 
@@ -10,10 +10,13 @@ const adminItems = [
     { icon: Users, label: "Accounts", href: "/accounts" },
     { icon: ScrollText, label: "Services", href: "/manage-service" },
     { icon: Calendar1, label: "Dentist working time", href: "/dentist-working-time" },
+    { icon: Album , label: "Dentist profile", href: "/dentist-profile" },
     { icon: CalendarCheck, label: "Appointment", href: "/appointment" },
+    { icon: ClipboardPlus, label: "Medical record", href: "/medical-record" },
+    { icon: Wallet, label: "Payment", href: "/payment" },
     { icon: Pill, label: "Medicine", href: "/manage-medicine" },
-    { icon: FileText, label: "Báo cáo", href: "/reports" },
-    { icon: Settings, label: "Cài đặt", href: "/settings" },
+    { icon: TicketPercent, label: "Promotion", href: "/promotion" },
+    { icon: Mailbox, label: "Review", href: "/review" },
 ];
 
 const staffItems = [
@@ -22,20 +25,18 @@ const staffItems = [
     { icon: Mail, label: "Messenger", href: "/messenger" },
     { icon: Calendar1, label: "Dentist working time", href: "/dentist-working-time" },
     { icon: CalendarCheck, label: "Appointment", href: "/appointment" },
+    { icon: Wallet, label: "Payment", href: "/payment" },
     { icon: ScrollText, label: "Services", href: "/manage-service" },
     { icon: Pill, label: "Medicine", href: "/manage-medicine" },
-    { icon: FileText, label: "Báo cáo", href: "/reports" },
-    { icon: Settings, label: "Cài đặt", href: "/settings" },
 ];
 
 const dentistItems = [
     { icon: BarChart3, label: "Dashboard", href: "/dashboard" },
     { icon: Users, label: "Accounts", href: "/accounts" },
     { icon: CalendarCheck, label: "Appointment", href: "/appointment" },
+    { icon: ClipboardPlus, label: "Medical record", href: "/medical-record" },
     { icon: ScrollText, label: "Services", href: "/manage-service" },
     { icon: Pill, label: "Medicine", href: "/manage-medicine" },
-    { icon: FileText, label: "Báo cáo", href: "/reports" },
-    { icon: Settings, label: "Cài đặt", href: "/settings" },
 ];
 
 function Sidebar() {
@@ -141,12 +142,12 @@ function Sidebar() {
                     )}
                     {!collapsed && (
                         <ConfirmDialog
-                          title="Confirm logout"
-                          description={`Are you sure you want to Logout?`}
-                          onConfirm={() => handleLogout()}>
-                        <button className={styles.logoutButton} title="Logout">
-                            <LogOut size={18} />
-                        </button>
+                            title="Confirm logout"
+                            description={`Are you sure you want to Logout?`}
+                            onConfirm={() => handleLogout()}>
+                            <button className={styles.logoutButton} title="Logout">
+                                <LogOut size={18} />
+                            </button>
                         </ConfirmDialog>
                     )}
                 </div>

@@ -113,6 +113,9 @@ function ManageService() {
     }
   }
 
+  const formatCurrency = (amount) =>
+    `${Number(amount || 0).toLocaleString('vi-VN')}đ`;
+
   useEffect(() => {
     if (!activeDropdown) return;
     const handleClick = (event) => {
@@ -138,10 +141,10 @@ function ManageService() {
             <h1 className={styles.title}>Service Management</h1>
             <p className={styles.subtitle}>Manage dental services and pricing</p>
           </div>
-          {!(role === 'Dentist' || role === 'Staff') && 
-          <button onClick={() => setIsModalOpen(true)} className={styles.addButton}>+ Add service</button>}
+          {!(role === 'Dentist' || role === 'Staff') &&
+            <button onClick={() => setIsModalOpen(true)} className={styles.addButton}>+ Add service</button>}
           <CreateService isOpen={isModalOpen} onSuccess={() => { fetchServices() }} onClose={() => setIsModalOpen(false)} openNotification={openNotification} />
-          </div>
+        </div>
 
         {/* Stats Cards */}
         <div className={styles.statsGrid}>
@@ -244,6 +247,7 @@ function ManageService() {
                   <th>Price</th>
                   <th>Duration</th>
                   <th>Guarantee</th>
+                  <th style={{ textAlign: "center" }}>Booking Service</th>
                   {!(role === 'Dentist' || role === 'Staff') && <th>Action</th>}
                 </tr>
               </thead>
@@ -263,13 +267,46 @@ function ManageService() {
                     </td>
                     <td>
                       <div className={styles.priceInfo}>
-                        <span className={styles.price}>{service.price} VNĐ</span>
+                        <span className={styles.price}>{formatCurrency(service.price)}</span>
                       </div>
                     </td>
                     <td>
                       <span className={styles.duration}>{service.duration} minutes</span>
                     </td>
                     <td className={styles.guarantee}>{service.guarantee}</td>
+                    <td>
+                      <div className={styles.bookingServiceStatus}>
+                        {service.isBookingService ? (
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#22c55e"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                          </svg>
+                        ) : (
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#94a3b8"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                          </svg>
+                        )}
+                      </div>
+                    </td>
                     {!(role === 'Dentist' || role === 'Staff') && (
                       <td>
                         <div className={styles.actionContainer} ref={activeDropdown === service._id ? dropdownRef : null}>

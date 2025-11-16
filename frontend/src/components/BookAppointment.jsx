@@ -27,11 +27,11 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
     const customerRef = useRef(null);
 
     const token = localStorage.getItem("token");
-    let isStaff = false;
+    let isAllowed = false;
     try {
         if (token) {
             const decoded = jwtDecode(token);
-            isStaff = decoded?.role === 'Staff';
+            isAllowed = decoded?.role === 'Staff' || decoded?.role === 'Admin';
         }
     } catch (e) {
         console.error('Cannot decode token:', e);
@@ -49,7 +49,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
 
     useEffect(() => {
         if (isOpen) {
-            axios.get("http://localhost:5000/service/all-services", {
+            axios.get("http://localhost:5000/service/booking-services", {
                 headers: { Authorization: `Bearer ${token}` }
             })
                 .then(res => setServices(res.data.services))
@@ -61,7 +61,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                 .then(res => setDentists(res.data.dentists))
                 .catch(err => console.error(err));
 
-            if (isOpen && isStaff) {
+            if (isOpen && isAllowed) {
                 axios.get("http://localhost:5000/user/get-all-customer", {
                     headers: { Authorization: `Bearer ${token}` }
                 })
@@ -72,7 +72,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                 setSelectedCustomer("");
             }
         }
-    }, [isOpen, token, isStaff]);
+    }, [isOpen, token, isAllowed]);
 
     useEffect(() => {
         if (selectedDentist && date) {
@@ -169,7 +169,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                 note
             };
 
-            if (isStaff) {
+            if (isAllowed) {
                 await axios.post(
                     "http://localhost:5000/appointment/staff-create-appointment",
                     { ...payload, customerId: selectedCustomer },
@@ -224,7 +224,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                 </div>
 
                 <div className={styles.modalBody}>
-                    {isStaff && (
+                    {isAllowed && (
                         <div className={styles.formSection}>
                             <div className={styles.sectionHeader}>
                                 <svg className={styles.sectionIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -494,7 +494,7 @@ const BookAppointment = ({ isOpen, onClose, openNotification, onSuccess }) => {
                             !selectedDentist ||
                             !date ||
                             !startTime ||
-                            (isStaff && !selectedCustomer)
+                            (isAllowed && !selectedCustomer)
                         }
                     >
                         Confirm Appointment

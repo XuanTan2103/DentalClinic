@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './Appointment.module.css';
 import Sidebar from "../components/Sidebar";
 import { CalendarCheck, Trash2, X } from 'lucide-react';
@@ -25,6 +26,7 @@ const Appointment = () => {
   const [appointmentToReject, setAppointmentToReject] = useState(null);
   const [role, setRole] = useState(null);
   const [isOpenBookAppointmentModal, setIsOpenBookAppointmentModal] = useState(false);
+  const navigate = useNavigate();
 
   const filteredAppointments = appointments
     .filter((appointment) => {
@@ -169,6 +171,36 @@ const Appointment = () => {
     }
   };
 
+  const handleCreateMedicalRecord = async (appointment) => {
+    try {
+      const token = localStorage.getItem('token');
+      const payload = {
+        appointmentId: appointment._id,
+        customerId: appointment.customer._id
+      };
+
+      const res = await axios.post(
+        'http://localhost:5000/medicalRecord/create-medical-record',
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      const recordId = res.data?.record?._id;
+      if (recordId) {
+        setAppointments(prev => prev.map(a =>
+          a._id === appointment._id ? { ...a, medicalRecordId: recordId } : a
+        ));
+      }
+      openNotification("success", "Medical record created successfully.");
+    } catch (error) {
+      console.error('Error creating medical record:', error);
+      openNotification("error", error.response?.data?.message || "Failed to create medical record.");
+    }
+  };
+
   const formatDate = (ymd) => {
     const [y, m, d] = (ymd || '').split('-');
     return y && m && d ? `${d}/${m}/${y}` : '';
@@ -190,8 +222,8 @@ const Appointment = () => {
         </div>
 
         <div className={styles.controls}>
-          {!(role === 'Dentist') && 
-          <button onClick={() => setIsOpenBookAppointmentModal(true)} className={styles.addButton}>Create appointment</button>}
+          {!(role === 'Dentist') &&
+            <button onClick={() => setIsOpenBookAppointmentModal(true)} className={styles.addButton}>Create appointment</button>}
           <BookAppointment isOpen={isOpenBookAppointmentModal} onSuccess={fetchAppointments} onClose={() => setIsOpenBookAppointmentModal(false)} openNotification={openNotification} />
         </div>
 
@@ -204,13 +236,14 @@ const Appointment = () => {
               value={customerSearch}
               onChange={(e) => setCustomerSearch(e.target.value)}
             />
-            <input
-              type="text"
-              placeholder="🔍 Search by dentist name..."
-              className={styles.searchInput}
-              value={dentistSearch}
-              onChange={(e) => setDentistSearch(e.target.value)}
-            />
+            {role !== 'Dentist' && (
+              <input
+                type="text"
+                placeholder="🔍 Search by dentist name..."
+                className={styles.searchInput}
+                value={dentistSearch}
+                onChange={(e) => setDentistSearch(e.target.value)}
+              />)}
           </div>
 
           <div className={styles.filterControls}>
@@ -250,7 +283,7 @@ const Appointment = () => {
             <div>Date & Time</div>
             <div>Services</div>
             <div>Status</div>
-            {role !== 'Dentist' && <div>Action</div>}
+            <div>Action</div>
           </div>
           <AppointmentDetail
             appointmentId={selectedAppointmentId}
@@ -312,6 +345,7 @@ const Appointment = () => {
                         : 'Rejected'}
                   </span>
                 </div>
+
                 {role !== 'Dentist' && (
                   <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
                     {appointment.status === 'pending' && (
@@ -345,6 +379,31 @@ const Appointment = () => {
                         </button>
                       )}
                     </ConfirmDelete>
+                  </div>
+                )}
+
+                {role === 'Dentist' && (
+                  <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
+                    {appointment.medicalRecordId ? (
+                      <button
+                        className={`${styles.actionButton} ${styles.confirmButton}`}
+                        onClick={() => navigate(`/medical-record`)}
+                      >
+                        Open Medical Record
+                      </button>
+                    ) : (
+                      appointment.status === 'confirmed' && (
+                        <ConfirmDialog
+                          title="Create Medical Record"
+                          description="Are you sure you want to create a medical record for this appointment?"
+                          onConfirm={() => handleCreateMedicalRecord(appointment)}
+                        >
+                          <button className={`${styles.actionButton} ${styles.confirmButton}`}>
+                            Create Medical Record
+                          </button>
+                        </ConfirmDialog>
+                      )
+                    )}
                   </div>
                 )}
               </div>

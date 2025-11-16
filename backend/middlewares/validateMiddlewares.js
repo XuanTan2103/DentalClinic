@@ -255,8 +255,8 @@ const validateCreateService = [
             }
             return true;
         }),
-    body('image')
-        .notEmpty().withMessage('Image cannot be blank'),
+    body('isBookingService')
+        .notEmpty().withMessage('IsBookingService cannot be blank'),
 
     (req, res, next) => {
         const errors = validationResult(req);

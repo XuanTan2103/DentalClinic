@@ -285,6 +285,12 @@
     color: #64748b;
 }
 
+.bookingServiceStatus {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 /* Action Container */
 .actionContainer {
     position: relative;

@@ -11,5 +11,6 @@ router.patch('/confirm-appointment/:id', verifyToken, verifyRole(['Staff', 'Admi
 router.patch('/reject-appointment/:id', verifyToken, verifyRole(['Staff', 'Admin']), appointmentController.rejectAppointment);
 router.get('/get-appointment/:id', verifyToken, verifyRole(['Admin', 'Staff', 'Dentist']), appointmentController.getAppointmentById);
 router.get('/get-appointments-by-dentist', verifyToken, verifyRole(['Admin', 'Staff', 'Dentist']), appointmentController.getAppointmentsByDentist);
+router.get('/get-appointments-by-customer', verifyToken, verifyRole(['Admin', 'Staff', 'Customer']), appointmentController.getAppointmentsByCustomer)
 
 module.exports = router;
