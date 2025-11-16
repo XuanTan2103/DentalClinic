@@ -1,7 +1,7 @@
-import { useState, useRef } from "react"
+import { useState } from "react"
 import styles from "./CreateService.module.css"
 import axios from "axios"
-import { Select } from "antd";
+import { Select, Switch } from "antd";
 
 function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
   const [formData, setFormData] = useState({
@@ -11,34 +11,22 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
     price: 0,
     type: "",
     guarantee: "",
-    image: "",
+    isBookingService: false,
   })
 
-  const fileInputRef = useRef(null)
-  const [imagePreview, setImagePreview] = useState("")
   const [loading, setLoading] = useState(false)
   const [fieldErrors, setFieldErrors] = useState({});
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    const data = new FormData()
-    data.append("name", formData.name);
-    data.append("description", formData.description);
-    data.append("duration", formData.duration);
-    data.append("price", formData.price);
-    data.append("type", formData.type);
-    data.append("guarantee", formData.guarantee);
-
-    if (formData.image) {
-      data.append("image", formData.image);
-    }
+    
     try {
       const token = localStorage.getItem('token');
-      await axios.post("http://localhost:5000/service/create-service", data,
+      await axios.post("http://localhost:5000/service/create-service", formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         })
@@ -51,9 +39,8 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
         price: 0,
         type: "",
         guarantee: "",
-        image: "",
+        isBookingService: false,
       })
-      setImagePreview("");
       onClose();
     } catch (error) {
       console.error("Failed to create service:", error)
@@ -83,23 +70,6 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
       ...prev,
       [field]: value,
     }))
-  }
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (ev) => {
-        setImagePreview(ev.target.result)
-      }
-      reader.readAsDataURL(file)
-
-      handleInputChange("image", file)
-    }
-  }
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click()
   }
 
   if (!isOpen) return null
@@ -214,34 +184,18 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Service Image <span className={styles.star}>*</span></label>
-              <div className={styles.imageUpload}>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className={styles.hiddenInput}
+              <label htmlFor="isBookingService" className={styles.label}>
+                Booking Service
+              </label>
+              <div className={styles.switchContainer}>
+                <Switch
+                  id="isBookingService"
+                  checked={formData.isBookingService}
+                  onChange={(checked) => handleInputChange("isBookingService", checked)}
                 />
-
-                {imagePreview ? (
-                  <div className={`${styles.imagePreview} ${fieldErrors.image ? styles.inputError : ""}`}>
-                    <img src={imagePreview || "/placeholder.svg"} alt="Preview" className={styles.previewImage} />
-                    <div className={styles.imageOverlay}>
-                      <button type="button" onClick={triggerFileInput} className={styles.changeImageBtn}>
-                        Change Photo
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className={`${styles.uploadArea} ${fieldErrors.image ? styles.inputError : ""}`} onClick={triggerFileInput}>
-                    <div className={styles.uploadContent}>
-                      <div className={styles.uploadIcon}>📁</div>
-                      <p className={styles.uploadText}>Click to upload photo</p>
-                      <p className={styles.uploadSubtext}>PNG, JPG, GIF maximum 5MB</p>
-                    </div>
-                  </div>
-                )}
+                <span className={styles.switchLabel}>
+                  {formData.isBookingService ? "Enabled" : "Disabled"}
+                </span>
               </div>
             </div>
 

@@ -13,6 +13,10 @@ const dentistWorkingTimeRoutes = require("./routes/dentistWorkingTime");
 const appointmentRoutes = require("./routes/appointment");
 const medicineCategoryRoutes = require('./routes/medicineCategory');
 const medicineRoutes = require('./routes/medicine');
+const medicalRecordRoutes = require('./routes/medicalrecord');
+const promotionRoutes = require('./routes/promotion');
+const billRoutes = require('./routes/bill');
+const reviewRoutes = require('./routes/review');
 const initSocket = require("./config/socket");
 
 const app = express();
@@ -41,6 +45,10 @@ app.use('/dentistWorkingTime', dentistWorkingTimeRoutes);
 app.use('/appointment', appointmentRoutes);
 app.use('/medicineCategory', medicineCategoryRoutes);
 app.use('/medicine', medicineRoutes);
+app.use('/medicalRecord', medicalRecordRoutes);
+app.use('/promotion', promotionRoutes);
+app.use('/bill', billRoutes);
+app.use('/review', reviewRoutes);
 
 const server = http.createServer(app);
 const io = initSocket(server);

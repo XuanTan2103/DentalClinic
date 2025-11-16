@@ -8,7 +8,7 @@ const serviceSchema = new Schema({
   price:       { type: Number, required: true },
   type: { type: String, enum: ['Check-up', 'Treatment', 'Aesthetics', 'Surgery', 'Orthodontics'], required: true },
   guarantee: { type: String, required: true },
-  image: { type: String, required: true }
+  isBookingService: { type: Boolean, default: false },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Service', serviceSchema);

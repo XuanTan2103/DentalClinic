@@ -63,10 +63,8 @@ function Header() {
                         <span className={`${styles.logo} ${isSticky ? styles.logoSticky : styles.logoNormal}`} onClick={() => navigate('/home')}>Gentle Care Dental</span>
                     </div>
                     <nav className={styles.nav}>
-                        <a href={'/about'} className={`${styles.navItem} ${isSticky ? styles.navItemSticky : styles.navItemNormal}`}>About</a>
+                        <a href={'/home'} className={`${styles.navItem} ${isSticky ? styles.navItemSticky : styles.navItemNormal}`}>Home</a>
                         <a href={'/service'} className={`${styles.navItem} ${isSticky ? styles.navItemSticky : styles.navItemNormal}`}>Service</a>
-                        <a href={'/pricelist'} className={`${styles.navItem} ${isSticky ? styles.navItemSticky : styles.navItemNormal}`}>Price list</a>
-                        <a href={'/doctors'} className={`${styles.navItem} ${isSticky ? styles.navItemSticky : styles.navItemNormal}`}>Doctors</a>
                     </nav>
                     <div className={styles.headerActions}>
                         <div className={`${styles.phoneInfo} ${isSticky ? styles.phoneInfoSticky : styles.phoneInfoNormal}`}>

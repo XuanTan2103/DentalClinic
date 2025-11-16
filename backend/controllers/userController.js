@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const DentistProfile = require('../models/DentistProfile');
 const DentistWorkingTime = require('../models/DentistWorkingTime');
+const MedicalRecord = require('../models/MedicalRecord')
 const bcrypt = require('bcrypt');
 const { get } = require('mongoose');
 require('dotenv').config();
@@ -209,10 +210,6 @@ const userController = {
 
             let extraInfo = null;
             let workingTime = null;
-
-            if (user.role === 'Customer') {
-                extraInfo = await PatientRecord.findOne({ customerId: id });
-            }
 
             if (user.role === 'Dentist') {
                 extraInfo = await DentistProfile.findOne({ dentistId: id });

@@ -23,6 +23,7 @@ const appointmentSchema = new Schema({
     rejectedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     rejectReason: { type: String, trim: true, maxlength: 500, default: null },
   },
+  medicalRecordId: { type: Schema.Types.ObjectId, ref: 'MedicalRecord', default: null },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Appointment', appointmentSchema);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { User as UserIcon, Mail, Phone, MapPin, Calendar, Stethoscope, GraduationCap, Clock, Heart, Pill, FileText, Award, Briefcase, CalendarDays, X } from "lucide-react";
+import { User as UserIcon, Mail, Phone, MapPin, Calendar, Stethoscope, GraduationCap, Clock, Award, Briefcase, CalendarDays, X } from "lucide-react";
 import styles from "./UserProfile.module.css";
 
 function UserProfile({ isOpen, onClose, userId }) {
@@ -8,27 +8,38 @@ function UserProfile({ isOpen, onClose, userId }) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
 
-  const roleIs = (role, value) => (role || "").toLowerCase() === (value || "").toLowerCase();
+  const roleIs = (role, value) =>
+    (role || "").toLowerCase() === (value || "").toLowerCase();
 
   const getRoleDisplayName = (role) => {
     const r = (role || "").toLowerCase();
     switch (r) {
-      case "admin": return "Admin";
-      case "staff": return "Staff";
-      case "dentist": return "Dentist";
-      case "customer": return "Customer";
-      default: return role;
+      case "admin":
+        return "Admin";
+      case "staff":
+        return "Staff";
+      case "dentist":
+        return "Dentist";
+      case "customer":
+        return "Customer";
+      default:
+        return role;
     }
   };
 
   const getRoleBadgeClass = (role) => {
     const r = (role || "").toLowerCase();
     switch (r) {
-      case "admin": return "badgeAdmin";
-      case "staff": return "badgeStaff";
-      case "dentist": return "badgeDentist";
-      case "customer": return "badgeCustomer";
-      default: return "badgeDefault";
+      case "admin":
+        return "badgeAdmin";
+      case "staff":
+        return "badgeStaff";
+      case "dentist":
+        return "badgeDentist";
+      case "customer":
+        return "badgeCustomer";
+      default:
+        return "badgeDefault";
     }
   };
 
@@ -37,7 +48,12 @@ function UserProfile({ isOpen, onClose, userId }) {
 
   const Avatar = ({ src, name }) => {
     const initials = name
-      ? name.split(" ").map(n => n[0] || "").join("").slice(0, 2).toUpperCase()
+      ? name
+        .split(" ")
+        .map((n) => n[0] || "")
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
       : "";
     return (
       <div className={styles.avatar}>
@@ -46,7 +62,9 @@ function UserProfile({ isOpen, onClose, userId }) {
             src={src}
             alt={name}
             className={styles.avatarImage}
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
           />
         ) : null}
         {!src && <div className={styles.avatarInitials}>{initials}</div>}
@@ -55,9 +73,7 @@ function UserProfile({ isOpen, onClose, userId }) {
   };
 
   const Badge = ({ children, variant }) => (
-    <span className={`${styles.badge} ${styles[variant]}`}>
-      {children}
-    </span>
+    <span className={`${styles.badge} ${styles[variant]}`}>{children}</span>
   );
 
   const InfoRow = ({ icon: Icon, label, value, fullWidth }) => (
@@ -76,26 +92,12 @@ function UserProfile({ isOpen, onClose, userId }) {
       experienceYears: extraInfo?.experienceYears || 0,
       biography: extraInfo?.biography || "",
       education: extraInfo?.education || "",
-      awards: extraInfo?.awards || ""
+      awards: extraInfo?.awards || "",
     };
     return {
       ...user,
       professionalInfo,
-      workingTime: workingTime || []
-    };
-  };
-
-  const mapCustomer = (user, extraInfo) => {
-    const medicalHistory = {
-      allergies: extraInfo?.allergies || extraInfo?.medicalHistory?.allergies || [],
-      currentMedications: extraInfo?.currentMedications || extraInfo?.medicalHistory?.currentMedications || [],
-      previousTreatments: extraInfo?.previousTreatments || extraInfo?.medicalHistory?.previousTreatments || [],
-      lastVisit: extraInfo?.lastVisit || extraInfo?.medicalHistory?.lastVisit || null,
-      nextAppointment: extraInfo?.nextAppointment || extraInfo?.medicalHistory?.nextAppointment || null,
-    };
-    return {
-      ...user,
-      medicalHistory
+      workingTime: workingTime || [],
     };
   };
 
@@ -105,9 +107,12 @@ function UserProfile({ isOpen, onClose, userId }) {
     setData(null);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get(`http://localhost:5000/user/get-user/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get(
+        `http://localhost:5000/user/get-user/${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const payload = res.data;
       let user = payload.user || null;
       const extraInfo = payload.extraInfo || null;
@@ -122,8 +127,6 @@ function UserProfile({ isOpen, onClose, userId }) {
 
         if (roleIs(user.role, "dentist")) {
           user = mapDentist(user, extraInfo, workingTime);
-        } else if (roleIs(user.role, "customer")) {
-          user = mapCustomer(user, extraInfo);
         }
       }
 
@@ -202,16 +205,8 @@ function UserProfile({ isOpen, onClose, userId }) {
       </div>
 
       <div className={styles.infoGrid}>
-        <InfoRow
-          icon={Mail}
-          label="Email"
-          value={user.email}
-        />
-        <InfoRow
-          icon={Phone}
-          label="Phone number"
-          value={user.phone}
-        />
+        <InfoRow icon={Mail} label="Email" value={user.email} />
+        <InfoRow icon={Phone} label="Phone number" value={user.phone} />
         <InfoRow
           icon={Calendar}
           label="Date of Birth"
@@ -220,7 +215,13 @@ function UserProfile({ isOpen, onClose, userId }) {
         <InfoRow
           icon={UserIcon}
           label="Gender"
-          value={user.gender === "male" ? "Male" : user.gender === "female" ? "Female" : "Other"}
+          value={
+            user.gender === "male"
+              ? "Male"
+              : user.gender === "female"
+                ? "Female"
+                : "Other"
+          }
         />
       </div>
 
@@ -230,75 +231,6 @@ function UserProfile({ isOpen, onClose, userId }) {
         value={user.address}
         fullWidth
       />
-    </div>
-  );
-
-  const MedicalHistory = () => (
-    <div className={styles.section}>
-      <div className={styles.sectionHeader}>
-        <Heart className={styles.sectionIcon} />
-        <h3>Medical information</h3>
-      </div>
-
-      <div className={styles.infoGrid}>
-        <InfoRow
-          icon={Pill}
-          label="Allergy"
-          value={user.medicalHistory?.allergies?.length > 0
-            ? user.medicalHistory.allergies.join(", ")
-            : "Do not have"}
-        />
-        <InfoRow
-          icon={Pill}
-          label="Current medications"
-          value={user.medicalHistory?.currentMedications?.length > 0
-            ? user.medicalHistory.currentMedications.join(", ")
-            : "Do not have"}
-        />
-        <InfoRow
-          icon={Calendar}
-          label="Last visit"
-          value={user.medicalHistory?.lastVisit
-            ? formatDate(user.medicalHistory.lastVisit)
-            : "Not yet"}
-        />
-        <InfoRow
-          icon={Calendar}
-          label="Next appointment"
-          value={user.medicalHistory?.nextAppointment
-            ? formatDate(user.medicalHistory.nextAppointment)
-            : "Not yet"}
-        />
-      </div>
-
-      {user.medicalHistory?.previousTreatments?.length > 0 && (
-        <div className={styles.treatmentsSection}>
-          <div className={styles.subsectionHeader}>
-            <FileText className={styles.iconSmall} />
-            <h4>Treatment history</h4>
-          </div>
-          <div className={styles.treatmentsList}>
-            {user.medicalHistory.previousTreatments.map((treatment, index) => (
-              <div key={index} className={styles.treatmentCard}>
-                <div className={styles.treatmentHeader}>
-                  <span className={styles.treatmentTitle}>
-                    {treatment.treatment || treatment.title || "Treatment"}
-                  </span>
-                  <span className={styles.treatmentDate}>
-                    {formatDate(treatment.date)}
-                  </span>
-                </div>
-                <div className={styles.treatmentDentist}>
-                  Dentist: {treatment.dentist || treatment.doctor || "-"}
-                </div>
-                {treatment.notes && (
-                  <div className={styles.treatmentNotes}>{treatment.notes}</div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 
@@ -318,9 +250,11 @@ function UserProfile({ isOpen, onClose, userId }) {
         <InfoRow
           icon={Clock}
           label="Experience Years"
-          value={user.professionalInfo?.experienceYears
-            ? `${user.professionalInfo.experienceYears} years`
-            : null}
+          value={
+            user.professionalInfo?.experienceYears
+              ? `${user.professionalInfo.experienceYears} years`
+              : null
+          }
         />
         <InfoRow
           icon={GraduationCap}
@@ -373,7 +307,9 @@ function UserProfile({ isOpen, onClose, userId }) {
       );
     }
 
-    const days = workingTime.workingDays.map((d) => daysOfWeek[d] || `Day ${d}`);
+    const days = workingTime.workingDays.map(
+      (d) => daysOfWeek[d] || `Day ${d}`
+    );
 
     return (
       <div className={styles.section}>
@@ -387,16 +323,24 @@ function UserProfile({ isOpen, onClose, userId }) {
             <Clock className={styles.scheduleIcon} />
             <span>Working time:</span>
           </div>
-          {workingTime.morning?.startTime && workingTime.morning?.endTime && (
-            <div>
-              <span>Morning: {workingTime.morning.startTime} - {workingTime.morning.endTime}</span>
-            </div>
-          )}
-          {workingTime.afternoon?.startTime && workingTime.afternoon?.endTime && (
-            <div>
-              <span>Afternoon: {workingTime.afternoon.startTime} - {workingTime.afternoon.endTime}</span>
-            </div>
-          )}
+          {workingTime.morning?.startTime &&
+            workingTime.morning?.endTime && (
+              <div>
+                <span>
+                  Morning: {workingTime.morning.startTime} -{" "}
+                  {workingTime.morning.endTime}
+                </span>
+              </div>
+            )}
+          {workingTime.afternoon?.startTime &&
+            workingTime.afternoon?.endTime && (
+              <div>
+                <span>
+                  Afternoon: {workingTime.afternoon.startTime} -{" "}
+                  {workingTime.afternoon.endTime}
+                </span>
+              </div>
+            )}
         </div>
 
         <div className={styles.scheduleRow}>
@@ -413,46 +357,28 @@ function UserProfile({ isOpen, onClose, userId }) {
   };
 
   const renderTabs = () => {
-    if (roleIs(user.role, "customer")) {
-      return (
-        <>
-          <button
-            className={`${styles.tab} ${activeTab === "basic" ? styles.tabActive : ""}`}
-            onClick={() => setActiveTab("basic")}
-          >
-            <UserIcon className={styles.tabIcon} />
-            <span>Basic information</span>
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === "medical" ? styles.tabActive : ""}`}
-            onClick={() => setActiveTab("medical")}
-          >
-            <Heart className={styles.tabIcon} />
-            <span>Medical information</span>
-          </button>
-        </>
-      );
-    }
-
     if (roleIs(user.role, "dentist")) {
       return (
         <>
           <button
-            className={`${styles.tab} ${activeTab === "basic" ? styles.tabActive : ""}`}
+            className={`${styles.tab} ${activeTab === "basic" ? styles.tabActive : ""
+              }`}
             onClick={() => setActiveTab("basic")}
           >
             <UserIcon className={styles.tabIcon} />
             <span>Basic information</span>
           </button>
           <button
-            className={`${styles.tab} ${activeTab === "professional" ? styles.tabActive : ""}`}
+            className={`${styles.tab} ${activeTab === "professional" ? styles.tabActive : ""
+              }`}
             onClick={() => setActiveTab("professional")}
           >
             <Briefcase className={styles.tabIcon} />
             <span>Professional information</span>
           </button>
           <button
-            className={`${styles.tab} ${activeTab === "schedule" ? styles.tabActive : ""}`}
+            className={`${styles.tab} ${activeTab === "schedule" ? styles.tabActive : ""
+              }`}
             onClick={() => setActiveTab("schedule")}
           >
             <CalendarDays className={styles.tabIcon} />
@@ -461,19 +387,17 @@ function UserProfile({ isOpen, onClose, userId }) {
         </>
       );
     }
-
     return null;
   };
 
   const renderContent = () => {
     if (activeTab === "basic") return <BasicInfo />;
-    if (activeTab === "medical") return <MedicalHistory />;
     if (activeTab === "professional") return <ProfessionalInfo />;
     if (activeTab === "schedule") return <WorkingSchedule />;
     return <BasicInfo />;
   };
 
-  const hasMultipleTabs = roleIs(user.role, "customer") || roleIs(user.role, "dentist");
+  const hasMultipleTabs = roleIs(user.role, "dentist");
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -486,15 +410,9 @@ function UserProfile({ isOpen, onClose, userId }) {
           <h2>User information</h2>
         </div>
 
-        {hasMultipleTabs && (
-          <div className={styles.tabs}>
-            {renderTabs()}
-          </div>
-        )}
+        {hasMultipleTabs && <div className={styles.tabs}>{renderTabs()}</div>}
 
-        <div className={styles.modalBody}>
-          {renderContent()}
-        </div>
+        <div className={styles.modalBody}>{renderContent()}</div>
       </div>
     </div>
   );

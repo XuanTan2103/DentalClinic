@@ -381,6 +381,7 @@ const appointmentController = {
                 bookAt: toVNISO(a.bookAt || a.createdAt),
                 createdAt: toVNISO(a.createdAt),
                 updatedAt: toVNISO(a.updatedAt),
+                medicalRecordId: a.medicalRecordId,
             }));
 
             return res.status(200).json({
@@ -393,7 +394,6 @@ const appointmentController = {
             return res.status(500).json({ message: error.message });
         }
     },
-
 
     confirmAppointment: async (req, res) => {
         try {
@@ -705,6 +705,7 @@ const appointmentController = {
                 bookAt: toVNISO(a.bookAt || a.createdAt),
                 createdAt: toVNISO(a.createdAt),
                 updatedAt: toVNISO(a.updatedAt),
+                medicalRecordId: a.medicalRecordId,
             }));
 
             return res.status(200).json({

@@ -1,0 +1,262 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: white;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.closeBtn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+}
+
+.closeBtn:hover {
+  background-color: #f5f5f5;
+}
+
+.body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+.required {
+  color: #f44336;
+}
+
+.infoRow {
+  display: flex;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.infoRow:last-child {
+  border-bottom: none;
+}
+
+.label {
+  width: 140px;
+  font-size: 13px;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.value {
+  font-size: 13px;
+  color: #333;
+  font-weight: 500;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e0e0e0;
+  font-size: 13px;
+}
+
+.table thead {
+  background-color: #fafafa;
+}
+
+.table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #666;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f5f5f5;
+  color: #333;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.center {
+  text-align: center;
+}
+
+.right {
+  text-align: right;
+}
+
+.bold {
+  font-weight: 600;
+}
+
+.select {
+  width: 100%;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.summaryLabel {
+  color: #666;
+}
+
+.summaryValue {
+  color: #333;
+  font-weight: 500;
+}
+
+.discountValue {
+  color: #f57c00;
+  font-weight: 600;
+}
+
+.divider {
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 12px 0;
+}
+
+.totalLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.totalValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2196f3;
+}
+
+.footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btnFinish,
+.btnCancel {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnFinish {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btnFinish:hover {
+  background-color: #45a049;
+}
+
+.btnCancel {
+  background-color: white;
+  color: #666;
+  border: 1px solid #d0d0d0;
+}
+
+.btnCancel:hover {
+  background-color: #f5f5f5;
+}
+
+@media (max-width: 768px) {
+  .modal {
+    max-height: 95vh;
+  }
+  
+  .header,
+  .body,
+  .footer {
+    padding: 12px 16px;
+  }
+  
+  .table {
+    font-size: 12px;
+  }
+  
+  .table th,
+  .table td {
+    padding: 8px;
+  }
+  
+  .footer {
+    flex-direction: column-reverse;
+  }
+  
+  .btnFinish,
+  .btnCancel {
+    width: 100%;
+  }
+  
+  .label {
+    width: 120px;
+  }
+}

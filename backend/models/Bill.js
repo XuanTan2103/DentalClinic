@@ -3,12 +3,15 @@ const { Schema } = mongoose;
 
 const billSchema = new Schema({
     medicalRecordId:  { type: mongoose.Schema.Types.ObjectId, ref: 'MedicalRecord', required: true },
-    staffId:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    staffId:  { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+    dentistId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     customerId:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    billDate:  { type: Date, default: Date.now },
     totalAmount:  { type: mongoose.Types.Decimal128, required: true, min: 0 },
+    promotionId:  { type: mongoose.Schema.Types.ObjectId, ref: 'Promotion' },
+    discountAmount:  { type: mongoose.Types.Decimal128, default: 0, min: 0 },
+    finalAmount:  { type: mongoose.Types.Decimal128, required: true, min: 0 },
     paymentMethod:  { type: String, enum: ['Cash', 'Bank Transfer'], required: true },
-    status:  { type: String, enum: ['Paid', 'Pending'], default: 'Pending' },
+    status:  { type: String, enum: ['Paid', 'Pending', 'Cancelled'], default: 'Pending' },
     serviceItems: [
         {
             serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true },

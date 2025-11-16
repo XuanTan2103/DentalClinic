@@ -5,21 +5,23 @@ const medicalRecordSchema = new Schema({
     customerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     dentistId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     appointmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Appointment', required: false },
-    diagnosis: { type: String, required: true },
+    chiefComplaint: { type: String },
+    medicalHistory: { type: String },
+    allergies: { type: String },
+    currentMedications: { type: String },
+    diagnosis: { type: String },
     recordDate: { type: Date, default: Date.now },
-    status: { type: String, enum: ['In Progress', 'Completed'], default: 'In Progress' },
-    followUpDate: { type: Date, required: false },
+    status: { type: String, enum: ['In Progress', 'Completed', 'Canceled'], default: 'In Progress' },
     servicesUsed: [
         {
             serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true },
-            name: { type: String, required: true },
-            quantity: { type: Number, default: 1 }
+            result: { type: String, required: false },
+            toothNumber: { type: String, required: false }
         }
     ],
     prescriptions: [
         {
             medicineId: { type: mongoose.Schema.Types.ObjectId, ref: 'Medicine', required: true },
-            name: { type: String, required: true },
             quantity: { type: Number, required: true },
             instructions: { type: String, required: true }
         }

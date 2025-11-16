@@ -8,13 +8,13 @@ const promotionSchema = new Schema({
     discountValue: { type: Number, required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
-    status: { type: String, enum: ['active', 'inactive'], default: 'active' },
-    createdAt: { type: Date, default: Date.now },
-    service: [
-        {
-            serviceId: { type: Schema.Types.ObjectId, ref: 'Service', required: true },
-        }
-    ]
-}, { timestamps: true });
+}, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
+
+promotionSchema.virtual('status').get(function () {
+    const now = new Date();
+    if (now < this.startDate) return 'UpComing';
+    if (now > this.endDate) return 'Expired';
+    return 'Ongoing';
+});
 
 module.exports = mongoose.model('Promotion', promotionSchema);
