@@ -231,6 +231,11 @@
   color: #1565c0;
 }
 
+.methodTag.none {
+  background-color: #c6cbd5;
+  color: rgb(25, 25, 25);
+}
+
 .methodTag.cash {
   background-color: #e8f5e9;
   color: #2e7d32;

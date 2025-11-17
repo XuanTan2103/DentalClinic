@@ -17,6 +17,8 @@ const medicalRecordRoutes = require('./routes/medicalrecord');
 const promotionRoutes = require('./routes/promotion');
 const billRoutes = require('./routes/bill');
 const reviewRoutes = require('./routes/review');
+const dashboardRoutes = require('./routes/dashboard');
+const bankTranferRoutes = require('./routes/bankTranfer');
 const initSocket = require("./config/socket");
 
 const app = express();
@@ -49,6 +51,8 @@ app.use('/medicalRecord', medicalRecordRoutes);
 app.use('/promotion', promotionRoutes);
 app.use('/bill', billRoutes);
 app.use('/review', reviewRoutes);
+app.use('/dashboard', dashboardRoutes);
+app.use('/bankTranfer', bankTranferRoutes);
 
 const server = http.createServer(app);
 const io = initSocket(server);

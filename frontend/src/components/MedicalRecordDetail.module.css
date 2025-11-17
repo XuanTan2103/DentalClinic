@@ -264,6 +264,11 @@
   transform: translateY(0);
 }
 
+.addServiceButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Modal Container */
 .panelContainer {
     background: white;
@@ -777,6 +782,11 @@
   gap: 8px; 
 }
 
+.prescriptionPriceRow {
+  align-items: center;
+  margin-top: 4px;
+}
+
 .prescriptionLabel {
   font-size: 13px;
   color: #7f8c8d;
@@ -788,6 +798,21 @@
   font-size: 14px;
   color: #2c3e50;
   flex: 1;
+}
+
+.prescriptionPrice {
+  font-size: 15px;
+  font-weight: 700;
+  color: #155724;
+  background: #d4f6de;
+  border-radius: 999px;
+  padding: 4px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 110px;
+  text-align: center;
+  border: 1px solid #9fdba5;
 }
 
 /* Actions */

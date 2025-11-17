@@ -2,13 +2,18 @@ import React, { useState, useEffect, useMemo } from 'react';
 import styles from './PaymentProcess.module.css';
 import axios from 'axios';
 import { Select } from 'antd';
+import QrModal from '../components/QrModal';
 
 const toNumber = (v) =>
   typeof v === 'object' && v?.$numberDecimal != null
     ? Number(v.$numberDecimal)
     : Number(v || 0);
 
-const formatCurrency = (amount) => `${toNumber(amount).toLocaleString('vi-VN')}đ`;
+const formatCurrency = (amount) =>
+  new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(toNumber(amount));
 
 const PaymentProcess = ({ isOpen, onClose, onSuccess, openNotification, billId }) => {
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -26,6 +31,7 @@ const PaymentProcess = ({ isOpen, onClose, onSuccess, openNotification, billId }
   });
   const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
+  const [isOpenQrModal, setIsOpenQrModal] = useState(false);
 
   const token = localStorage.getItem('token');
 
@@ -94,6 +100,10 @@ const PaymentProcess = ({ isOpen, onClose, onSuccess, openNotification, billId }
 
   const handleFinishPayment = async () => {
     try {
+      if (paymentMethod === "Bank Transfer") {
+        setIsOpenQrModal(true);
+        return;
+      }
       setLoading(true);
       await axios.patch(
         `http://localhost:5000/bill/pay-bill/${billId}`,
@@ -257,7 +267,7 @@ const PaymentProcess = ({ isOpen, onClose, onSuccess, openNotification, billId }
                     " " +
                     (p.discountType === "percentage"
                       ? `- ${p.discountValue}%`
-                      : `- ${Number(p.discountValue).toLocaleString("vi-VN")}đ`)
+                      : `- ${formatCurrency(p.discountValue)}`)
                 }))
               ]}
             />
@@ -288,6 +298,12 @@ const PaymentProcess = ({ isOpen, onClose, onSuccess, openNotification, billId }
           <button className={styles.btnFinish} onClick={handleFinishPayment} disabled={loading}>
             {loading ? 'Processing...' : 'Finish Payment'}
           </button>
+          <QrModal
+            isOpen={isOpenQrModal}
+            billId={billId}
+            selectedPromotion={selectedPromotion}
+            onClose={() => setIsOpenQrModal(false)}
+          />
         </div>
       </div>
     </div>

@@ -114,7 +114,10 @@ function ManageService() {
   }
 
   const formatCurrency = (amount) =>
-    `${Number(amount || 0).toLocaleString('vi-VN')}đ`;
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(Number(amount) || 0);
 
   useEffect(() => {
     if (!activeDropdown) return;
@@ -185,7 +188,7 @@ function ManageService() {
             <div>
               <div className={styles.statNumber}>{(totalRevenue / 1000000).toFixed(1)}M</div>
               <div className={styles.statLabel}>Tổng giá trị</div>
-              <div className={styles.statChange}>VNĐ</div>
+              <div className={styles.statChange}>USD</div>
             </div>
           </div>
         </div>

@@ -36,6 +36,31 @@ function initSocket(server) {
   });
 
   io.on("connection", (socket) => {
+    // Join appointment room based on user role
+    socket.on("joinAppointmentRoom", () => {
+      const userRole = socket.user.role;
+      const userId = socket.user.id;
+      
+      // Admin and Staff join general appointment room
+      if (userRole === 'Admin' || userRole === 'Staff') {
+        socket.join('appointments:all');
+      }
+      // Dentist joins their own appointment room
+      if (userRole === 'Dentist') {
+        socket.join(`appointments:dentist:${userId}`);
+      }
+      // Customer joins their own appointment room
+      if (userRole === 'Customer') {
+        socket.join(`appointments:customer:${userId}`);
+      }
+    });
+
+    socket.on("leaveAppointmentRoom", () => {
+      socket.leave('appointments:all');
+      socket.leave(`appointments:dentist:${socket.user.id}`);
+      socket.leave(`appointments:customer:${socket.user.id}`);
+    });
+
     socket.on("joinConversation", (conversationId) => {
       if (!conversationId) return;
       socket.join(String(conversationId));
@@ -84,5 +109,30 @@ function initSocket(server) {
   return io;
 }
 
+// Helper function to emit appointment updates
+function emitAppointmentUpdate(appointment, eventType) {
+  if (!ioInstance) return;
+  
+  const appointmentData = {
+    appointment,
+    eventType, // 'created', 'updated', 'deleted', 'confirmed', 'rejected'
+    timestamp: new Date()
+  };
+
+  // Emit to all admins and staff
+  ioInstance.to('appointments:all').emit('appointmentUpdate', appointmentData);
+  
+  // Emit to specific dentist
+  if (appointment.dentistId) {
+    ioInstance.to(`appointments:dentist:${appointment.dentistId}`).emit('appointmentUpdate', appointmentData);
+  }
+  
+  // Emit to specific customer
+  if (appointment.customerId) {
+    ioInstance.to(`appointments:customer:${appointment.customerId}`).emit('appointmentUpdate', appointmentData);
+  }
+}
+
 module.exports = initSocket;
 module.exports.getIo = () => ioInstance;
+module.exports.emitAppointmentUpdate = emitAppointmentUpdate;

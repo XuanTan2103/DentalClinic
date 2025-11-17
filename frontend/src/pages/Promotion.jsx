@@ -76,7 +76,10 @@ const Promotion = () => {
 
     const formatDiscount = (type, value) => {
         if (type === 'percentage') return `${Number(value).toString()}%`;
-        return `${Number(value).toLocaleString('vi-VN')}đ`;
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+        }).format(Number(value) || 0);
     };
 
     const normalizeStatus = (s) => String(s || '').toLowerCase();

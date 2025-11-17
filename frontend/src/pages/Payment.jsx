@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import styles from './Payment.module.css';
 import Sidebar from '../components/Sidebar';
 import { TicketPercent } from "lucide-react";
@@ -7,6 +7,7 @@ import { notification, Select } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import BillDetail from '../components/BillDetail';
 import PaymentProcess from '../components/PaymentProcess';
+import { io } from 'socket.io-client';
 
 const Payment = () => {
     const [bills, setBills] = useState([]);
@@ -18,8 +19,10 @@ const Payment = () => {
     const [isOpenPay, setIsOpenPay] = useState(false);
     const [selectedBillId, setSelectedBillId] = useState(null);
     const [api, contextHolder] = notification.useNotification();
+    const socketRef = useRef(null);
+    const selectedBillRef = useRef(null);
 
-    const openNotification = (type, detailMessage = "") => {
+    const openNotification = useCallback((type, detailMessage = "") => {
         if (type === "success") {
             api.open({
                 message: "Action successful!",
@@ -37,7 +40,7 @@ const Payment = () => {
                 icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
             });
         }
-    };
+    }, [api]);
 
     const fetchBills = useCallback(async () => {
         try {
@@ -61,13 +64,48 @@ const Payment = () => {
         fetchBills();
     }, [fetchBills]);
 
+    useEffect(() => {
+        selectedBillRef.current = selectedBillId ? selectedBillId.toString() : null;
+    }, [selectedBillId]);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const socket = io('http://localhost:5000', {
+            auth: { token },
+        });
+
+        socketRef.current = socket;
+
+        const handleBankTransferPaid = ({ billId }) => {
+            fetchBills();
+            const currentSelected = selectedBillRef.current;
+            if (currentSelected && String(billId) === currentSelected) {
+                setIsOpenPay(false);
+                openNotification('success', 'Bank transfer payment confirmed automatically.');
+            }
+        };
+
+        socket.on('bankTransferPaid', handleBankTransferPaid);
+
+        return () => {
+            socket.off('bankTransferPaid', handleBankTransferPaid);
+            socket.disconnect();
+        };
+    }, [fetchBills, openNotification]);
+
     const formatCurrency = (amount) =>
-        `${Number(amount || 0).toLocaleString('vi-VN')}đ`;
+        new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+        }).format(Number(amount) || 0);
 
     const normalize = (s) => String(s || '').toLowerCase();
 
     const getPaymentMethodLabel = (method) => {
         const m = String(method || '');
+        if (m === 'None') return 'None';
         if (m === 'Cash') return 'Cash';
         if (m === 'Bank Transfer') return 'Bank Transfer';
         return m;
