@@ -93,10 +93,10 @@ function Profile() {
     };
 
     const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('vi-VN', { 
+        return new Intl.NumberFormat('en-US', { 
             style: 'currency', 
-            currency: 'VND' 
-        }).format(amount);
+            currency: 'USD' 
+        }).format(Number(amount) || 0);
     };
 
     const getStatusClass = (status) => {

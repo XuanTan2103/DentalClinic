@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Appointment.module.css';
 import Sidebar from "../components/Sidebar";
@@ -11,6 +11,7 @@ import ConfirmDelete from "../components/ConfirmDelete";
 import ConfirmDialog from "../components/ConfirmDialog";
 import AppointmentDetail from '../components/AppointmentDetail';
 import BookAppointment from '../components/BookAppointment';
+import { io } from 'socket.io-client';
 
 const Appointment = () => {
   const [appointments, setAppointments] = useState([]);
@@ -27,6 +28,7 @@ const Appointment = () => {
   const [role, setRole] = useState(null);
   const [isOpenBookAppointmentModal, setIsOpenBookAppointmentModal] = useState(false);
   const navigate = useNavigate();
+  const socketRef = useRef(null);
 
   const filteredAppointments = appointments
     .filter((appointment) => {
@@ -93,6 +95,94 @@ const Appointment = () => {
   useEffect(() => {
     fetchAppointments();
   }, [fetchAppointments]);
+
+  // Socket connection for real-time updates
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    // Connect to socket
+    socketRef.current = io("http://localhost:5000", {
+      auth: { token }
+    });
+
+    const socket = socketRef.current;
+
+    socket.on('connect', () => {
+      console.log('Socket connected for appointments');
+      socket.emit('joinAppointmentRoom');
+    });
+
+    socket.on('appointmentUpdate', (data) => {
+      const { appointment, eventType } = data;
+      
+      // Get current user ID to avoid duplicate notifications for own actions
+      let currentUserId = null;
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const decoded = jwtDecode(token);
+          currentUserId = String(decoded.userId || decoded.id);
+        }
+      } catch (e) {
+        // Ignore decode errors
+      }
+      
+      if (eventType === 'created') {
+        // Add new appointment to the list
+        setAppointments((prev) => {
+          // Check if appointment already exists to avoid duplicates
+          if (prev.some(apt => apt._id === appointment._id)) {
+            return prev;
+          }
+          return [appointment, ...prev];
+        });
+        // Only show notification if it's not created by current user (they already see the success message)
+        const appointmentCustomerId = String(appointment.customerId?._id || appointment.customerId || '');
+        if (currentUserId && appointmentCustomerId !== currentUserId) {
+          openNotification("success", "New appointment created!");
+        }
+      } else if (eventType === 'updated' || eventType === 'confirmed' || eventType === 'rejected') {
+        // Update existing appointment
+        setAppointments((prev) =>
+          prev.map((apt) =>
+            apt._id === appointment._id ? appointment : apt
+          )
+        );
+        // Show notification for status changes (user will see their own action's notification already)
+        if (eventType === 'confirmed') {
+          openNotification("success", "Appointment confirmed!");
+        } else if (eventType === 'rejected') {
+          openNotification("error", "Appointment rejected!");
+        }
+      } else if (eventType === 'deleted') {
+        // Remove appointment from list
+        setAppointments((prev) => prev.filter((apt) => apt._id !== appointment._id));
+        // Only show notification if it's not deleted by current user
+        const appointmentCustomerId = String(appointment.customerId?._id || appointment.customerId || '');
+        if (currentUserId && appointmentCustomerId !== currentUserId) {
+          openNotification("success", "Appointment deleted!");
+        }
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Socket disconnected');
+    });
+
+    socket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+    });
+
+    // Cleanup on unmount
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.emit('leaveAppointmentRoom');
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
+  }, []);
 
 
   const handleConfirm = async (id) => {

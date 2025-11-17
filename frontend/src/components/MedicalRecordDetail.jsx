@@ -6,6 +6,24 @@ import ConfirmDelete from "../components/ConfirmDelete";
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
 
+const normalizeAmount = (value) => {
+  if (value == null) return null;
+  if (typeof value === 'object' && value.$numberDecimal != null) {
+    return Number(value.$numberDecimal);
+  }
+  const numeric = Number(value);
+  return Number.isNaN(numeric) ? null : numeric;
+};
+
+const formatCurrency = (amount) => {
+  const normalized = normalizeAmount(amount);
+  if (normalized == null) return '';
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(normalized);
+};
+
 const DENTAL_CHART = {
   upper: [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28],
   lower: [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38]
@@ -568,7 +586,7 @@ const MedicalRecordDetail = ({ isOpen, onClose, medicalRecordId, openNotificatio
                 >
                   <button
                     className={`${styles.actionButton} ${styles.confirmButton}`}
-                    disabled={isSaving}
+                    disabled={isSaving || medicalRecord?.status !== 'In Progress'}
                   >
                     {isSaving ? 'Saving...' : 'Save Changes'}
                   </button>
@@ -584,6 +602,7 @@ const MedicalRecordDetail = ({ isOpen, onClose, medicalRecordId, openNotificatio
                 <h3 className={styles.sectionTitle}>Services Used</h3>
                 <button
                   className={styles.addServiceButton}
+                  disabled={medicalRecord?.status !== 'In Progress'}
                   onClick={() => {
                     setIsAddGeneralService(prev => !prev);
                     setSelectedService(null); setServiceSearch(''); setAddResult('');
@@ -602,7 +621,7 @@ const MedicalRecordDetail = ({ isOpen, onClose, medicalRecordId, openNotificatio
                     search={serviceSearch}
                     setSearch={setServiceSearch}
                     creating={isSaving}
-                    rightMetaRender={(it) => typeof it.price === 'number' ? `${it.price.toLocaleString('vi-VN')}đ` : ''}
+                    rightMetaRender={(it) => typeof it.price === 'number' ? formatCurrency(it.price) : ''}
                     extraFields={
                       <div style={{ marginTop: 12 }}>
                         <input
@@ -624,7 +643,7 @@ const MedicalRecordDetail = ({ isOpen, onClose, medicalRecordId, openNotificatio
                         {service.serviceId?.name} {service.toothNumber && `(Tooth ${service.toothNumber})`}
                       </span>
                       <span className={styles.servicePrice}>
-                        {service.serviceId?.price?.toLocaleString('vi-VN')}đ
+                        {formatCurrency(service.serviceId?.price)}
                       </span>
                       <ConfirmDelete
                         title="Confirm service item deletion"
@@ -717,6 +736,7 @@ const MedicalRecordDetail = ({ isOpen, onClose, medicalRecordId, openNotificatio
                         </div>
                         <button
                           className={styles.addServiceButton}
+                          disabled={medicalRecord?.status !== 'In Progress'}
                           onClick={() => {
                             setIsAddServiceItem(prev => !prev);
                             setSelectedService(null); setServiceSearch(''); setAddResult('');
@@ -734,7 +754,7 @@ const MedicalRecordDetail = ({ isOpen, onClose, medicalRecordId, openNotificatio
                             search={serviceSearch}
                             setSearch={setServiceSearch}
                             creating={isSaving}
-                            rightMetaRender={(it) => typeof it.price === 'number' ? `${it.price.toLocaleString('vi-VN')}đ` : ''}
+                            rightMetaRender={(it) => typeof it.price === 'number' ? formatCurrency(it.price) : ''}
                             extraFields={
                               <div style={{ marginTop: 12 }}>
                                 <input
@@ -754,6 +774,7 @@ const MedicalRecordDetail = ({ isOpen, onClose, medicalRecordId, openNotificatio
                       <>
                         <button
                           className={styles.addServiceButton}
+                          disabled={medicalRecord?.status !== 'In Progress'}
                           onClick={() => {
                             setIsAddServiceItem(prev => !prev);
                             setSelectedService(null); setServiceSearch(''); setAddResult('');
@@ -771,7 +792,7 @@ const MedicalRecordDetail = ({ isOpen, onClose, medicalRecordId, openNotificatio
                             search={serviceSearch}
                             setSearch={setServiceSearch}
                             creating={isSaving}
-                            rightMetaRender={(it) => typeof it.price === 'number' ? `${it.price.toLocaleString('vi-VN')}đ` : ''}
+                            rightMetaRender={(it) => typeof it.price === 'number' ? formatCurrency(it.price) : ''}
                             extraFields={
                               <div style={{ marginTop: 12 }}>
                                 <input
@@ -801,6 +822,7 @@ const MedicalRecordDetail = ({ isOpen, onClose, medicalRecordId, openNotificatio
                 <h3 className={styles.sectionTitle}>Prescription</h3>
                 <button
                   className={styles.addServiceButton}
+                  disabled={medicalRecord?.status !== 'In Progress'}
                   onClick={() => {
                     setIsAddMedicine(prev => !prev);
                     setSelectedMedicine(null); setMedicineSearch('');
@@ -855,6 +877,12 @@ const MedicalRecordDetail = ({ isOpen, onClose, medicalRecordId, openNotificatio
                         <div className={styles.prescriptionRow}>
                           <span className={styles.prescriptionLabel}>Instructions:</span>
                           <span className={styles.prescriptionValue}>{item.instructions}</span>
+                        </div>
+                        <div className={`${styles.prescriptionRow} ${styles.prescriptionPriceRow}`}>
+                          <span className={styles.prescriptionLabel}>Price:</span>
+                          <span className={styles.prescriptionPrice}>
+                            {formatCurrency(item.medicineId?.price)}
+                          </span>
                         </div>
                       </div>
                       <ConfirmDelete

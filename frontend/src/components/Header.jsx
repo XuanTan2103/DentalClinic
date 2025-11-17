@@ -89,12 +89,13 @@ function Header() {
             {isMenuOpen && (
                 <div className={styles.mobileMenu}>
                     <div className={styles.mobileMenuContent}>
-                        {['Home', 'About', 'Services', 'Doctors', 'Testimonials', 'Contact'].map((item) => (
-                            <a key={item} href={`#${item.toLowerCase()}`} className={styles.mobileNavItem}>{item}</a>
+                        {['Home', 'Service'].map((item) => (
+                            <a key={item} href={`/${item.toLowerCase()}`} className={styles.mobileNavItem}>{item}</a>
                         ))}
                         <div className={styles.mobileMenuFooter}>
                             <div className={styles.mobilePhoneInfo}><Phone size={18} /> 0909 999 999</div>
-                            <button className={styles.mobileCtaButton}>Book Now</button>
+                            <button onClick={() => setIsOpenBookAppointmentModal(true)} className={styles.mobileCtaButton}>Book Now</button>
+                            <BookAppointment isOpen={isOpenBookAppointmentModal} onClose={() => setIsOpenBookAppointmentModal(false)} openNotification={openNotification}/>
                         </div>
                     </div>
                 </div>

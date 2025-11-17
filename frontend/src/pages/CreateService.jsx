@@ -133,8 +133,8 @@ function CreateService({ isOpen, onClose, onSuccess, openNotification }) {
               </div>
 
               <div className={styles.formGroup}>
-                <label htmlFor="price" className={styles.label}>
-                  Price (VND) <span className={styles.star}>*</span>
+              <label htmlFor="price" className={styles.label}>
+                  Price (USD) <span className={styles.star}>*</span>
                 </label>
                 <input
                   id="price"

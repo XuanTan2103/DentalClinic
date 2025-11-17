@@ -233,10 +233,13 @@ const medicalRecordController = {
         }
       }
 
-      const record = await MedicalRecord.findById(id).select('dentistId').lean();
+      const record = await MedicalRecord.findById(id).select('dentistId status').lean();
       if (!record) return res.status(404).json({ message: 'Medical record not found' });
       if (String(record.dentistId) !== String(req.user.id) && req.user.role !== 'Admin') {
         return res.status(403).json({ message: 'Not allowed' });
+      }
+      if (['Completed', 'Cancelled'].includes(record.status)) {
+        return res.status(400).json({ message: 'Cannot modify a completed or cancelled medical record' });
       }
 
       const updates = {};
@@ -273,6 +276,15 @@ const medicalRecordController = {
 
       if (!mongoose.isValidObjectId(serviceId)) {
         return res.status(400).json({ message: 'Invalid service id' });
+      }
+
+      const record = await MedicalRecord.findById(id).select('status dentistId').lean();
+      if (!record) return res.status(404).json({ message: 'Medical record not found' });
+      if (String(record.dentistId) !== String(req.user.id) && req.user.role !== 'Admin') {
+        return res.status(403).json({ message: 'Not allowed' });
+      }
+      if (['Completed', 'Cancelled'].includes(record.status)) {
+        return res.status(400).json({ message: 'Cannot modify a completed or cancelled medical record' });
       }
 
       const service = await Service.findById(serviceId).select('_id name').lean();
@@ -334,6 +346,15 @@ const medicalRecordController = {
         return res.status(400).json({ message: "Invalid service item id" });
       }
 
+      const record = await MedicalRecord.findById(recordId).select('status dentistId').lean();
+      if (!record) return res.status(404).json({ message: 'Medical record not found' });
+      if (String(record.dentistId) !== String(req.user.id) && req.user.role !== 'Admin') {
+        return res.status(403).json({ message: 'Not allowed' });
+      }
+      if (['Completed', 'Cancelled'].includes(record.status)) {
+        return res.status(400).json({ message: 'Cannot modify a completed or cancelled medical record' });
+      }
+
       const updatedRecord = await MedicalRecord.findByIdAndUpdate(
         recordId,
         { $pull: { servicesUsed: { _id: serviceItemId } } },
@@ -377,6 +398,15 @@ const medicalRecordController = {
         return res.status(400).json({ message: "Instructions are required and must be a string" });
       }
 
+      const record = await MedicalRecord.findById(id).select('status dentistId').lean();
+      if (!record) return res.status(404).json({ message: 'Medical record not found' });
+      if (String(record.dentistId) !== String(req.user.id) && req.user.role !== 'Admin') {
+        return res.status(403).json({ message: 'Not allowed' });
+      }
+      if (['Completed', 'Cancelled'].includes(record.status)) {
+        return res.status(400).json({ message: 'Cannot modify a completed or cancelled medical record' });
+      }
+
       const medicine = await Medicine.findById(medicineId).select("_id");
       if (!medicine) {
         return res.status(404).json({ message: "Medicine not found" });
@@ -414,6 +444,15 @@ const medicalRecordController = {
       }
       if (!mongoose.isValidObjectId(prescriptionItemId)) {
         return res.status(400).json({ message: "Invalid prescription item id" });
+      }
+
+      const record = await MedicalRecord.findById(recordId).select('status dentistId').lean();
+      if (!record) return res.status(404).json({ message: 'Medical record not found' });
+      if (String(record.dentistId) !== String(req.user.id) && req.user.role !== 'Admin') {
+        return res.status(403).json({ message: 'Not allowed' });
+      }
+      if (['Completed', 'Cancelled'].includes(record.status)) {
+        return res.status(400).json({ message: 'Cannot modify a completed or cancelled medical record' });
       }
 
       const updated = await MedicalRecord.findByIdAndUpdate(
@@ -564,7 +603,7 @@ const medicalRecordController = {
         promotionId: undefined,
         discountAmount: D128(0),
         finalAmount: D128(totalAmountNum),
-        paymentMethod: 'Cash',
+        paymentMethod: 'None',
         status: 'Pending',
         serviceItems,
         medicineItems

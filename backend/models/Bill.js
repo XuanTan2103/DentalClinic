@@ -10,8 +10,17 @@ const billSchema = new Schema({
     promotionId:  { type: mongoose.Schema.Types.ObjectId, ref: 'Promotion' },
     discountAmount:  { type: mongoose.Types.Decimal128, default: 0, min: 0 },
     finalAmount:  { type: mongoose.Types.Decimal128, required: true, min: 0 },
-    paymentMethod:  { type: String, enum: ['Cash', 'Bank Transfer'], required: true },
+    paymentMethod:  { type: String, enum: ['None', 'Cash', 'Bank Transfer'], required: true },
     status:  { type: String, enum: ['Paid', 'Pending', 'Cancelled'], default: 'Pending' },
+    bankTransferContent: { type: String },
+    bankTransferInfo: {
+        sepayId: Number,
+        gateway: String,
+        transactionDate: String,
+        accountNumber: String,
+        referenceCode: String,
+        raw: Schema.Types.Mixed  
+    },
     serviceItems: [
         {
             serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true },

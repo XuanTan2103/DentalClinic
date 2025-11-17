@@ -149,7 +149,7 @@ const CreateUpdatePromotion = ({ isOpen, onClose, onSuccess, mode, promotion, op
                 }
               >
                 <Select.Option value="percentage">Percentage (%)</Select.Option>
-                <Select.Option value="fixed">Fixed (VND)</Select.Option>
+                <Select.Option value="fixed">Fixed (USD)</Select.Option>
               </Select>
             </div>
 
@@ -162,7 +162,7 @@ const CreateUpdatePromotion = ({ isOpen, onClose, onSuccess, mode, promotion, op
                 value={formData.discountValue}
                 onChange={handleChange}
                 className={errors.discountValue ? styles.inputError : ''}
-                placeholder={formData.discountType === 'percentage' ? 'e.g., 20' : 'e.g., 50000'}
+                placeholder={formData.discountType === 'percentage' ? 'e.g., 20' : 'e.g., 500'}
                 min="0"
                 step={formData.discountType === 'percentage' ? '0.01' : '1'}
               />

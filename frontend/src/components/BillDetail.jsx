@@ -8,7 +8,10 @@ const toNumber = (v) =>
     : Number(v || 0);
 
 const formatCurrency = (amount) =>
-  `${toNumber(amount).toLocaleString('vi-VN')}₫`;
+  new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(toNumber(amount));
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);

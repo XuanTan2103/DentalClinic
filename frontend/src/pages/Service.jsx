@@ -31,6 +31,15 @@ const Service = () => {
         fetchServices();
     }, [fetchServices]);
 
+    const formatPrice = (value) => {
+        const amount = Number(value);
+        if (Number.isNaN(amount)) return '';
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+        }).format(amount);
+    };
+
     useEffect(() => {
         if (serviceTypes.length === 0) return;
         const state = location.state || null;
@@ -99,7 +108,7 @@ const Service = () => {
                                                         {service.duration}
                                                     </td>
                                                     <td className={`${styles.tableCell} ${styles.priceCell}`}>
-                                                        {service.price.toLocaleString()}₫
+                                                        {formatPrice(service.price)}
                                                     </td>
                                                     <td className={`${styles.tableCell} ${styles.guaranteeCell}`}>
                                                         {service.guarantee}

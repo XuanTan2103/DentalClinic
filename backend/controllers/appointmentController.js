@@ -4,6 +4,7 @@ const Service = require('../models/Service');
 const DentistWorkingTime = require('../models/DentistWorkingTime');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
+const { emitAppointmentUpdate } = require('../config/socket');
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -52,6 +53,55 @@ function toHHMM_VN(dateObj) {
     const hh = String(vn.getUTCHours()).padStart(2, '0');
     const mm = String(vn.getUTCMinutes()).padStart(2, '0');
     return `${hh}:${mm}`;
+}
+
+// Helper function to format appointment for socket emission
+async function formatAppointmentForSocket(appointment) {
+    if (!appointment) return null;
+    
+    const populated = await Appointment.findById(appointment._id || appointment)
+        .populate('customerId', 'fullName email phone')
+        .populate('dentistId', 'fullName email');
+    
+    if (!populated) return null;
+    
+    const toLocalYMD_VN = (dateObj) => ensureYMD_VN(dateObj);
+    const toLocalHHMM_VN = (dateObj) => {
+        if (!dateObj) return null;
+        const vn = new Date(dateObj.getTime() + VN_OFFSET_MIN * MS_PER_MIN);
+        const hh = String(vn.getUTCHours()).padStart(2, '0');
+        const mm = String(vn.getUTCMinutes()).padStart(2, '0');
+        return `${hh}:${mm}`;
+    };
+    const toVNISO = (dateObj) => {
+        if (!dateObj) return null;
+        const vn = new Date(dateObj.getTime() + VN_OFFSET_MIN * MS_PER_MIN);
+        const y = vn.getUTCFullYear();
+        const m = String(vn.getUTCMonth() + 1).padStart(2, '0');
+        const d = String(vn.getUTCDate()).padStart(2, '0');
+        const hh = String(vn.getUTCHours()).padStart(2, '0');
+        const mm = String(vn.getUTCMinutes()).padStart(2, '0');
+        const ss = String(vn.getUTCSeconds()).padStart(2, '0');
+        return `${y}-${m}-${d}T${hh}:${mm}:${ss}+07:00`;
+    };
+    
+    return {
+        _id: populated._id,
+        status: populated.status,
+        dentist: populated.dentistId,
+        customer: populated.customerId,
+        note: populated.note,
+        service: populated.service,
+        date: toLocalYMD_VN(populated.date),
+        startTime: toLocalHHMM_VN(populated.startTime),
+        endTime: toLocalHHMM_VN(populated.endTime),
+        bookAt: toVNISO(populated.bookAt || populated.createdAt),
+        createdAt: toVNISO(populated.createdAt),
+        updatedAt: toVNISO(populated.updatedAt),
+        medicalRecordId: populated.medicalRecordId,
+        dentistId: populated.dentistId?._id || populated.dentistId,
+        customerId: populated.customerId?._id || populated.customerId,
+    };
 }
 
 const appointmentController = {
@@ -176,6 +226,17 @@ const appointmentController = {
             });
 
             await appointment.save();
+            
+            // Emit socket event for real-time update
+            try {
+                const formattedAppointment = await formatAppointmentForSocket(appointment);
+                if (formattedAppointment) {
+                    emitAppointmentUpdate(formattedAppointment, 'created');
+                }
+            } catch (socketError) {
+                console.error('Error emitting appointment create event:', socketError);
+            }
+            
             res.status(201).json({ message: 'Appointment created successfully', appointment });
         } catch (error) {
             console.error('Error creating appointment:', error);
@@ -304,6 +365,17 @@ const appointmentController = {
             });
 
             await appointment.save();
+            
+            // Emit socket event for real-time update
+            try {
+                const formattedAppointment = await formatAppointmentForSocket(appointment);
+                if (formattedAppointment) {
+                    emitAppointmentUpdate(formattedAppointment, 'created');
+                }
+            } catch (socketError) {
+                console.error('Error emitting appointment create event:', socketError);
+            }
+            
             res.status(201).json({ message: 'Appointment created successfully', appointment });
         } catch (error) {
             console.error('Error creating appointment:', error);
@@ -321,6 +393,17 @@ const appointmentController = {
             if (!deleted) {
                 return res.status(404).json({ message: 'Appointment not found' });
             }
+            
+            // Emit socket event for real-time update
+            try {
+                const formattedAppointment = await formatAppointmentForSocket(deleted);
+                if (formattedAppointment) {
+                    emitAppointmentUpdate(formattedAppointment, 'deleted');
+                }
+            } catch (socketError) {
+                console.error('Error emitting appointment delete event:', socketError);
+            }
+            
             return res.status(200).json({
                 message: 'Appointment deleted successfully',
                 appointment: {
@@ -419,6 +502,17 @@ const appointmentController = {
                 rejectReason: null,
             };
             await appointment.save();
+            
+            // Emit socket event for real-time update
+            try {
+                const formattedAppointment = await formatAppointmentForSocket(appointment);
+                if (formattedAppointment) {
+                    emitAppointmentUpdate(formattedAppointment, 'confirmed');
+                }
+            } catch (socketError) {
+                console.error('Error emitting appointment confirm event:', socketError);
+            }
+            
             const customer = await User.findById(appointment.customerId);
             const dentist = await User.findById(appointment.dentistId);
             const serviceNames = appointment.service?.map(s => s.name).join(', ') || '';
@@ -515,6 +609,17 @@ const appointmentController = {
                 confirmedBy: null,
             };
             await appointment.save();
+            
+            // Emit socket event for real-time update
+            try {
+                const formattedAppointment = await formatAppointmentForSocket(appointment);
+                if (formattedAppointment) {
+                    emitAppointmentUpdate(formattedAppointment, 'rejected');
+                }
+            } catch (socketError) {
+                console.error('Error emitting appointment reject event:', socketError);
+            }
+            
             const customer = await User.findById(appointment.customerId);
             const dentist = await User.findById(appointment.dentistId);
             const serviceNames = appointment.service?.map(s => s.name).join(', ') || '';
