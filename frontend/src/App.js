@@ -19,6 +19,7 @@ import MedicalRecord from './pages/MedicalRecord';
 import Promotion from './pages/Promotion';
 import Payment from './pages/Payment';
 import DentistProfile from './pages/DentistProfile';
+import Notification from './pages/Notification';
 import Review from './pages/Review';
 import Service from './pages/Service';
 
@@ -44,6 +45,7 @@ function App() {
           <Route path="/medical-record" element={<MedicalRecord />} />
           <Route path="/promotion" element={<Promotion />} />
           <Route path="/payment" element={<Payment />} />
+          <Route path="/notification" element={<Notification />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/dentist-profile" element={<DentistProfile />} />
           <Route path="/review" element={<Review />} />

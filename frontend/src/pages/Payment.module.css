@@ -330,3 +330,55 @@
     width: 100%;
   }
 }
+
+@media (max-width: 600px) {
+  .payment {
+    flex-direction: column;
+  }
+
+  .header {
+    padding: 24px 16px;
+    border-radius: 0 0 12px 12px;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .headerSubtitle {
+    margin-left: 0;
+  }
+
+  .statsGrid {
+    gap: 16px;
+  }
+
+  .statCard {
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .statNumber {
+    font-size: 24px;
+  }
+
+  .listSection {
+    padding: 16px;
+  }
+
+  .filterGroup {
+    width: 100%;
+  }
+
+  .actionButtons {
+    flex-wrap: wrap;
+  }
+
+  .btnEdit,
+  .btnDelete {
+    flex: 1 1 120px;
+    text-align: center;
+  }
+}

@@ -934,3 +934,75 @@
     gap: 12px; 
   }
 }
+
+@media (max-width: 520px) {
+  .overlay {
+    padding: 12px;
+  }
+
+  .modal {
+    width: 100%;
+    border-radius: 10px;
+  }
+
+  .header,
+  .tabs {
+    padding: 16px;
+  }
+
+  .tabs {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tab {
+    flex: 1 1 45%;
+    justify-content: center;
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .infoRow {
+    padding: 12px;
+  }
+
+  .label {
+    width: auto;
+  }
+
+  .actions,
+  .footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .actionButton,
+  .cancelButton,
+  .finishButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  .modal {
+    border-radius: 12px 12px 0 0;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .tabs {
+    padding: 12px;
+  }
+}

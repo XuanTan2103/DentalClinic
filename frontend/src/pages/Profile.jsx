@@ -322,6 +322,13 @@ function Profile() {
                                                                 <span className={styles.billValue}>{bill.staff.fullName}</span>
                                                             </div>
                                                         )}
+                                                        
+                                                        {bill.status === 'Cancelled' && bill.cancelReason && (
+                                                            <div className={styles.billRow}>
+                                                                <span className={styles.billLabel}>Cancel reason:</span>
+                                                                <span className={styles.billCancelReason}>{bill.cancelReason}</span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             )}

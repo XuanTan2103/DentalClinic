@@ -254,3 +254,52 @@
 .chatBody::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
+@media (max-width: 600px) {
+    .chatBotContainer {
+        right: 16px;
+        bottom: 80px;
+    }
+
+    .chatWindow {
+        width: calc(100% - 32px);
+        height: 65vh;
+        right: 16px;
+        bottom: 16px;
+        border-radius: 16px;
+    }
+
+    .chatHeader {
+        padding: 12px;
+    }
+
+    .chatBody {
+        padding: 12px;
+    }
+
+    .chatInputWrapper {
+        padding: 10px;
+    }
+
+    .sendButton {
+        padding: 10px 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    .chatWindow {
+        width: calc(100% - 24px);
+        height: 75vh;
+        right: 12px;
+        bottom: 12px;
+    }
+
+    .chatBotButton {
+        width: 40px;
+        height: 40px;
+    }
+
+    .chatTitle {
+        font-size: 14px;
+    }
+}

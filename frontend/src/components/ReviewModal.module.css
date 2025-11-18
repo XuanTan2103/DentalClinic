@@ -170,6 +170,50 @@
   color: #666666;
 }
 
+@media (max-width: 520px) {
+  .overlay {
+    padding: 12px;
+  }
+
+  .modal {
+    padding: 24px 20px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .starsContainer {
+    flex-wrap: wrap;
+  }
+
+  .buttonContainer {
+    flex-direction: column-reverse;
+  }
+
+  .button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .modal {
+    padding: 20px 16px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .starsContainer {
+    gap: 8px;
+  }
+
+  .textarea {
+    min-height: 100px;
+  }
+}
+
 /* Animations */
 @keyframes fadeIn {
   from {

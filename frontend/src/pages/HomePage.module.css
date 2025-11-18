@@ -683,6 +683,45 @@
   }
 }
 
+@media (max-width: 640px) {
+  .bannerSection {
+    height: 40vh;
+  }
+
+  .bannerNavButton {
+    display: none;
+  }
+
+  .aboutSection,
+  .servicesSection,
+  .doctorsSection,
+  .testimonialsSection,
+  .ctaSection {
+    padding: 3.5rem 0;
+  }
+
+  .aboutStats {
+    grid-template-columns: 1fr;
+  }
+
+  .aboutBadge {
+    right: 0;
+    bottom: -1rem;
+  }
+
+  .doctorImage {
+    height: 18rem;
+  }
+
+  .testimonialCard {
+    flex: 0 0 260px;
+  }
+
+  .ctaButtons {
+    flex-direction: column;
+  }
+}
+
 /* CTA Section */
 .ctaSection {
   padding: 5rem 0;

@@ -357,6 +357,33 @@
     }
 }
 
+@media (max-width: 600px) {
+    .denstistWorkingTime {
+        flex-direction: column;
+    }
+
+    .container {
+        padding: 0 1rem 1.25rem;
+    }
+
+    .header {
+        border-radius: 0 0 12px 12px;
+    }
+
+    .controls {
+        justify-content: flex-start;
+    }
+
+    .addButton {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .tableSection {
+        border-radius: 10px;
+    }
+}
+
 @media (max-width: 480px) {
     .headerContent {
         flex-direction: column;

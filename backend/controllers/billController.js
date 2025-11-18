@@ -1,6 +1,7 @@
 const Bill = require('../models/Bill');
 const mongoose = require('mongoose');
 const Promotion = require('../models/Promotion');
+const { emitBillUpdate } = require('../config/socket');
 
 const billController = {
     payBill: async (req, res) => {
@@ -63,6 +64,27 @@ const billController = {
 
             const updated = await bill.save();
 
+            // Populate bill for socket emission
+            const populatedBill = await Bill.findById(updated._id)
+                .populate('customerId', 'fullName phoneNumber email')
+                .populate('staffId', 'fullName email')
+                .populate('dentistId', 'fullName email')
+                .lean();
+
+            // Emit socket event for real-time update
+            try {
+                if (populatedBill) {
+                    // Convert Decimal128 to numbers for frontend
+                    const convert = v => (v && v.$numberDecimal ? Number(v.$numberDecimal) : Number(v || 0));
+                    populatedBill.totalAmount = convert(populatedBill.totalAmount);
+                    populatedBill.discountAmount = convert(populatedBill.discountAmount);
+                    populatedBill.finalAmount = convert(populatedBill.finalAmount);
+                    emitBillUpdate(populatedBill, 'paid');
+                }
+            } catch (socketError) {
+                console.error('Error emitting bill paid event:', socketError);
+            }
+
             return res.status(200).json({
                 message: 'Bill paid successfully',
                 bill: updated,
@@ -98,6 +120,7 @@ const billController = {
                 finalAmount: Number(b.finalAmount?.$numberDecimal ?? b.finalAmount ?? 0),
                 paymentMethod: b.paymentMethod,
                 status: b.status,
+                cancelReason: b.cancelReason,
                 createdAt: b.createdAt,
             }));
 
@@ -228,6 +251,7 @@ const billController = {
                 finalAmount: convert(bill.finalAmount),
                 paymentMethod: bill.paymentMethod,
                 status: bill.status,
+                cancelReason: bill.cancelReason,
                 createdAt: bill.createdAt,
 
                 staff: bill.staffId
@@ -258,6 +282,73 @@ const billController = {
             console.error("Error fetching bills by customer:", error);
             return res.status(500).json({
                 message: "An error occurred while fetching bills",
+                error,
+            });
+        }
+    },
+
+    cancelBill: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { cancelReason } = req.body;
+            const staffId = req.user.id;
+
+            if (!mongoose.isValidObjectId(id)) {
+                return res.status(400).json({ message: 'Invalid bill id' });
+            }
+
+            if (!cancelReason || typeof cancelReason !== 'string' || cancelReason.trim().length === 0) {
+                return res.status(400).json({ message: 'Cancel reason is required' });
+            }
+
+            const bill = await Bill.findById(id);
+            if (!bill) {
+                return res.status(404).json({ message: 'Bill not found' });
+            }
+
+            if (bill.status === 'Paid') {
+                return res.status(400).json({ message: 'Cannot cancel a paid bill' });
+            }
+
+            if (bill.status === 'Cancelled') {
+                return res.status(400).json({ message: 'Bill is already cancelled' });
+            }
+
+            bill.status = 'Cancelled';
+            bill.cancelReason = cancelReason.trim();
+            bill.staffId = staffId;
+
+            const updated = await bill.save();
+
+            // Populate bill for socket emission
+            const populatedBill = await Bill.findById(updated._id)
+                .populate('customerId', 'fullName phoneNumber email')
+                .populate('staffId', 'fullName email')
+                .populate('dentistId', 'fullName email')
+                .lean();
+
+            // Emit socket event for real-time update
+            try {
+                if (populatedBill) {
+                    // Convert Decimal128 to numbers for frontend
+                    const convert = v => (v && v.$numberDecimal ? Number(v.$numberDecimal) : Number(v || 0));
+                    populatedBill.totalAmount = convert(populatedBill.totalAmount);
+                    populatedBill.discountAmount = convert(populatedBill.discountAmount);
+                    populatedBill.finalAmount = convert(populatedBill.finalAmount);
+                    emitBillUpdate(populatedBill, 'cancelled');
+                }
+            } catch (socketError) {
+                console.error('Error emitting bill cancelled event:', socketError);
+            }
+
+            return res.status(200).json({
+                message: 'Bill cancelled successfully',
+                bill: updated,
+            });
+        } catch (error) {
+            console.error('Error cancelling bill:', error);
+            return res.status(500).json({
+                message: 'An error occurred while cancelling bill',
                 error,
             });
         }

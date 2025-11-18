@@ -109,3 +109,45 @@
 .guaranteeCell {
   font-size: 0.9rem;
 }
+
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding-bottom: 2rem;
+  }
+
+  .container {
+    padding: 0 1.25rem;
+  }
+
+  .header {
+    text-align: center;
+  }
+
+  .typeTitle {
+    font-size: 1.25rem;
+  }
+
+  .tableWrapper {
+    margin: 0 -1rem;
+    padding: 0 1rem;
+  }
+
+  .table {
+    font-size: 0.85rem;
+  }
+
+  .tableHeaderCell,
+  .tableCell {
+    padding: 0.75rem;
+  }
+
+  .descriptionCell {
+    font-size: 0.85rem;
+  }
+}

@@ -8,6 +8,8 @@ import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import BillDetail from '../components/BillDetail';
 import PaymentProcess from '../components/PaymentProcess';
 import { io } from 'socket.io-client';
+import { jwtDecode } from "jwt-decode";
+import ConfirmDelete from '../components/ConfirmDelete';
 
 const Payment = () => {
     const [bills, setBills] = useState([]);
@@ -78,6 +80,10 @@ const Payment = () => {
 
         socketRef.current = socket;
 
+        socket.on('connect', () => {
+            socket.emit('joinBillRoom');
+        });
+
         const handleBankTransferPaid = ({ billId }) => {
             fetchBills();
             const currentSelected = selectedBillRef.current;
@@ -87,11 +93,68 @@ const Payment = () => {
             }
         };
 
+        const handleBillUpdate = (data) => {
+            const { bill, eventType } = data;
+
+            // Get current user ID to avoid duplicate notifications for own actions
+            let currentUserId = null;
+            try {
+                const decoded = jwtDecode(token);
+                currentUserId = String(decoded.userId || decoded.id);
+            } catch (e) {
+                // Ignore decode errors
+            }
+
+            if (eventType === 'paid') {
+                // Update existing bill or add new one
+                setBills((prev) => {
+                    const existingIndex = prev.findIndex(b => b._id === bill._id);
+                    if (existingIndex >= 0) {
+                        // Update existing bill
+                        const updated = [...prev];
+                        updated[existingIndex] = { ...updated[existingIndex], ...bill };
+                        return updated;
+                    } else {
+                        // Add new bill if not exists
+                        return [bill, ...prev];
+                    }
+                });
+                // Only show notification if it's not paid by current user (they already see the success message)
+                const billCustomerId = String(bill.customerId?._id || bill.customerId || '');
+                if (currentUserId && billCustomerId !== currentUserId) {
+                    openNotification('success', 'The bill has been paid!');
+                }
+            } else if (eventType === 'created') {
+                // Add new bill to the list
+                setBills((prev) => {
+                    // Check if bill already exists to avoid duplicates
+                    if (prev.some(b => b._id === bill._id)) {
+                        return prev;
+                    }
+                    return [bill, ...prev];
+                });
+            }
+        };
+
         socket.on('bankTransferPaid', handleBankTransferPaid);
+        socket.on('billUpdate', handleBillUpdate);
+
+        socket.on('disconnect', () => {
+            console.log('Socket disconnected');
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error('Socket connection error:', error);
+        });
 
         return () => {
             socket.off('bankTransferPaid', handleBankTransferPaid);
-            socket.disconnect();
+            socket.off('billUpdate', handleBillUpdate);
+            if (socketRef.current) {
+                socketRef.current.emit('leaveBillRoom');
+                socketRef.current.disconnect();
+                socketRef.current = null;
+            }
         };
     }, [fetchBills, openNotification]);
 
@@ -147,14 +210,14 @@ const Payment = () => {
 
     const handleDelete = async (id) => {
         setLoading(true);
-        try{
+        try {
             const token = localStorage.getItem('token');
             await axios.delete(`http://localhost:5000/bill/delete-bill/${id}`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : {}
             });
             openNotification('success', 'Bill deleted successfully');
             fetchBills();
-        } catch (err){
+        } catch (err) {
             console.error('Error deleting bill:', err);
             openNotification('error', err?.response?.data?.message || 'Failed to delete bill.');
         } finally {
@@ -314,7 +377,8 @@ const Payment = () => {
                         isOpen={isOpenPay}
                         billId={selectedBillId}
                         onClose={() => {
-                            setIsOpenPay(false)}}
+                            setIsOpenPay(false)
+                        }}
                         onSuccess={() => {
                             fetchBills();
                         }}
@@ -363,18 +427,22 @@ const Payment = () => {
                                             <td>
                                                 <div className={styles.actionButtons} onClick={(e) => e.stopPropagation()}>
                                                     {b.status === 'Pending' && (
-                                                    <button
-                                                        className={styles.btnEdit}
-                                                        onClick={() => handlePay(b._id)}
-                                                    >
-                                                        Pay
-                                                    </button>)}
-                                                    <button
-                                                        className={styles.btnDelete}
-                                                        onClick={() => handleDelete(b._id)}
-                                                    >
-                                                        Delete
-                                                    </button>
+                                                        <button
+                                                            className={styles.btnEdit}
+                                                            onClick={() => handlePay(b._id)}
+                                                        >
+                                                            Pay
+                                                        </button>)}
+                                                    <ConfirmDelete
+                                                        title="Confirm bill deletion"
+                                                        description={`Are you sure you want to delete this bill of ${b.customer?.fullName}? This action cannot be undone.`}
+                                                        onConfirm={() => handleDelete(b._id)}>
+                                                        <button
+                                                            className={styles.btnDelete}
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </ConfirmDelete>
                                                 </div>
                                             </td>
                                         </tr>

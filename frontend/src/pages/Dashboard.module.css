@@ -333,3 +333,45 @@
         gap: 12px;
     }
 }
+
+@media (max-width: 600px) {
+    .dashboard {
+        flex-direction: column;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .main {
+        padding: 16px;
+    }
+
+    .statCard {
+        padding: 16px;
+    }
+
+    .statCardHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .chartHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .chartControls {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .revenueTotal {
+        font-size: 1rem;
+        padding: 12px;
+    }
+}

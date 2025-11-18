@@ -469,3 +469,86 @@
 .messagesContainer::-webkit-scrollbar-thumb:hover {
     background: rgba(102, 126, 234, 0.5);
 }
+
+@media (max-width: 1024px) {
+    .chatContainer {
+        padding: 16px;
+    }
+
+    .sidebar {
+        width: 280px;
+    }
+}
+
+@media (max-width: 768px) {
+    .messenger {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .chatContainer {
+        flex-direction: column;
+        padding: 12px;
+        gap: 12px;
+        min-height: 100vh;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 45vh;
+    }
+
+    .sidebarHeader {
+        padding: 16px;
+    }
+
+    .contactsList {
+        max-height: 30vh;
+    }
+
+    .chatArea {
+        width: 100%;
+        min-height: 55vh;
+    }
+
+    .chatHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .chatActions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .messagesContainer {
+        padding: 16px;
+    }
+
+    .message {
+        flex-direction: column;
+    }
+
+    .messageContent {
+        max-width: 100%;
+    }
+
+    .messageInputContainer {
+        flex-wrap: wrap;
+        padding: 16px;
+    }
+
+    .inputActionBtn,
+    .sendBtn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .noChatSelectedVideo {
+        width: 100%;
+        height: auto;
+    }
+}

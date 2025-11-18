@@ -232,6 +232,12 @@ const BillDetail = ({ isOpen, billId, onClose }) => {
                       {bill.status}
                     </span>
                   </div>
+                  {bill.status === 'Cancelled' && bill.cancelReason && (
+                    <div className={styles.summaryRow}>
+                      <span className={styles.summaryLabel}>Cancel reason:</span>
+                      <span className={styles.cancelReason}>{bill.cancelReason}</span>
+                    </div>
+                  )}
                   <div className={styles.summaryDivider} />
                   <div className={styles.summaryRow}>
                     <span className={styles.summaryLabel}>Subtotal:</span>

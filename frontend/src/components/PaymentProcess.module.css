@@ -227,6 +227,96 @@
   background-color: #f5f5f5;
 }
 
+.btnCancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnFinish:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Cancel Modal Styles */
+.cancelOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.cancelModal {
+  background: white;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.cancelDescription {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  box-sizing: border-box;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
+.textarea:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.textarea::placeholder {
+  color: #999;
+}
+
+.btnCancelConfirm {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: #f44336;
+  color: white;
+}
+
+.btnCancelConfirm:hover:not(:disabled) {
+  background-color: #d32f2f;
+}
+
+.btnCancelConfirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .modal {
     max-height: 95vh;
@@ -258,5 +348,65 @@
   
   .label {
     width: 120px;
+  }
+}
+
+@media (max-width: 520px) {
+  .overlay {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-width: 100%;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .header,
+  .body,
+  .footer {
+    padding: 12px;
+  }
+
+  .infoRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .label {
+    width: 100%;
+  }
+
+  .table {
+    font-size: 11px;
+  }
+
+  .summaryRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 420px) {
+  .modal {
+    border-radius: 10px 10px 0 0;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .table {
+    font-size: 10px;
+  }
+
+  .btnFinish,
+  .btnCancel {
+    font-size: 13px;
+    padding: 9px 18px;
   }
 }

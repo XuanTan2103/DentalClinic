@@ -5,6 +5,7 @@ const DentistWorkingTime = require('../models/DentistWorkingTime');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const { emitAppointmentUpdate } = require('../config/socket');
+const { notifyNewAppointment, notifyAppointmentDecision } = require('./notificationController');
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -236,6 +237,13 @@ const appointmentController = {
             } catch (socketError) {
                 console.error('Error emitting appointment create event:', socketError);
             }
+
+            // Create notification for staff
+            try {
+                await notifyNewAppointment(appointment);
+            } catch (notifError) {
+                console.error('Error creating notification for new appointment:', notifError);
+            }
             
             res.status(201).json({ message: 'Appointment created successfully', appointment });
         } catch (error) {
@@ -375,6 +383,13 @@ const appointmentController = {
             } catch (socketError) {
                 console.error('Error emitting appointment create event:', socketError);
             }
+
+            // Create notification for staff
+            try {
+                await notifyNewAppointment(appointment);
+            } catch (notifError) {
+                console.error('Error creating notification for new appointment:', notifError);
+            }
             
             res.status(201).json({ message: 'Appointment created successfully', appointment });
         } catch (error) {
@@ -512,6 +527,13 @@ const appointmentController = {
             } catch (socketError) {
                 console.error('Error emitting appointment confirm event:', socketError);
             }
+
+            // Create notification for dentist
+            try {
+                await notifyAppointmentDecision(appointment, 'confirmed');
+            } catch (notifError) {
+                console.error('Error creating notification for appointment confirmation:', notifError);
+            }
             
             const customer = await User.findById(appointment.customerId);
             const dentist = await User.findById(appointment.dentistId);
@@ -618,6 +640,13 @@ const appointmentController = {
                 }
             } catch (socketError) {
                 console.error('Error emitting appointment reject event:', socketError);
+            }
+
+            // Create notification for dentist
+            try {
+                await notifyAppointmentDecision(appointment, 'rejected');
+            } catch (notifError) {
+                console.error('Error creating notification for appointment rejection:', notifError);
             }
             
             const customer = await User.findById(appointment.customerId);

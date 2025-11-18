@@ -12,6 +12,7 @@ const billSchema = new Schema({
     finalAmount:  { type: mongoose.Types.Decimal128, required: true, min: 0 },
     paymentMethod:  { type: String, enum: ['None', 'Cash', 'Bank Transfer'], required: true },
     status:  { type: String, enum: ['Paid', 'Pending', 'Cancelled'], default: 'Pending' },
+    cancelReason: { type: String },
     bankTransferContent: { type: String },
     bankTransferInfo: {
         sepayId: Number,

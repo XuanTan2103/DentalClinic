@@ -32,6 +32,9 @@ const PaymentProcess = ({ isOpen, onClose, onSuccess, openNotification, billId }
   const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
   const [isOpenQrModal, setIsOpenQrModal] = useState(false);
+  const [isOpenCancelModal, setIsOpenCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelling, setCancelling] = useState(false);
 
   const token = localStorage.getItem('token');
 
@@ -125,10 +128,39 @@ const PaymentProcess = ({ isOpen, onClose, onSuccess, openNotification, billId }
   };
 
   const handleCancelPayment = () => {
-    if (window.confirm('Are you sure cancel payment?')) {
-      setPaymentMethod('');
-      setSelectedPromotion('');
+    setIsOpenCancelModal(true);
+  };
+
+  const handleCancelBill = async () => {
+    if (!cancelReason || cancelReason.trim().length === 0) {
+      openNotification?.('error', 'Cancel reason is required');
+      return;
     }
+
+    try {
+      setCancelling(true);
+      await axios.patch(
+        `http://localhost:5000/bill/cancel-bill/${billId}`,
+        { cancelReason: cancelReason.trim() },
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+      );
+      openNotification?.('success', 'Bill cancelled successfully');
+      onSuccess?.();
+      setIsOpenCancelModal(false);
+      onClose?.();
+      setCancelReason('');
+    } catch (err) {
+      console.error(err);
+      openNotification?.('error', err?.response?.data?.message || 'Failed to cancel bill');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  const handleCloseCancelModal = () => {
+    if (cancelling) return;
+    setIsOpenCancelModal(false);
+    setCancelReason('');
   };
 
   const handleOverlayClick = (e) => {
@@ -306,6 +338,60 @@ const PaymentProcess = ({ isOpen, onClose, onSuccess, openNotification, billId }
           />
         </div>
       </div>
+
+      {/* Cancel Bill Modal */}
+      {isOpenCancelModal && (
+        <div className={styles.cancelOverlay} onClick={handleCloseCancelModal}>
+          <div className={styles.cancelModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.header}>
+              <h2 className={styles.title}>Cancel Bill</h2>
+              <button 
+                className={styles.closeBtn} 
+                onClick={handleCloseCancelModal} 
+                disabled={cancelling}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className={styles.body}>
+              <p className={styles.cancelDescription}>
+                Please provide a reason for cancelling this bill.
+              </p>
+              <div className={styles.section}>
+                <label className={styles.sectionTitle} style={{ display: 'block', marginBottom: '8px' }}>
+                  Cancel Reason <span className={styles.required}>*</span>
+                </label>
+                <textarea
+                  className={styles.textarea}
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="Enter the reason for cancellation..."
+                  rows={4}
+                  disabled={cancelling}
+                />
+              </div>
+            </div>
+
+            <div className={styles.footer}>
+              <button 
+                className={styles.btnCancel} 
+                onClick={handleCloseCancelModal}
+                disabled={cancelling}
+              >
+                Back
+              </button>
+              <button 
+                className={styles.btnCancelConfirm} 
+                onClick={handleCancelBill}
+                disabled={cancelling || !cancelReason.trim()}
+              >
+                {cancelling ? 'Cancelling...' : 'Confirm Cancel'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
