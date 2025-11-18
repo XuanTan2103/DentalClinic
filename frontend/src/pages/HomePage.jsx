@@ -302,7 +302,7 @@ function HomePage() {
               <div className={styles.testimonialsWrapper}>
                 <div className={styles.testimonialsTrack}>
                   {loopedReviews.map((review, i) => (
-                    <div key={review._id || i} className={styles.testimonialCard}>
+                    <div key={`${review._id || i}-track1-${i}`} className={styles.testimonialCard}>
                       <div className={styles.testimonialRating}>
                         {renderStars(review.rating)}
                       </div>
@@ -319,7 +319,7 @@ function HomePage() {
                 </div>
                 <div className={styles.testimonialsTrack} aria-hidden="true">
                   {loopedReviews.map((review, i) => (
-                    <div key={`dup-${review._id || i}`} className={styles.testimonialCard}>
+                    <div key={`dup-${review._id || i}-track2-${i}`} className={styles.testimonialCard}>
                       <div className={styles.testimonialRating}>
                         {renderStars(review.rating)}
                       </div>
