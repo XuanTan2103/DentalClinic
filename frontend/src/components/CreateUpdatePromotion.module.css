@@ -235,3 +235,24 @@
     width: 100%;
   }
 }
+
+@media (max-width: 420px) {
+  .overlay {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .modal {
+    border-radius: 12px 12px 0 0;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .form {
+    padding: 18px;
+  }
+}

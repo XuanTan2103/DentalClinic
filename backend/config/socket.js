@@ -61,6 +61,61 @@ function initSocket(server) {
       socket.leave(`appointments:customer:${socket.user.id}`);
     });
 
+    // Join medical record room based on user role
+    socket.on("joinMedicalRecordRoom", () => {
+      const userRole = socket.user.role;
+      const userId = socket.user.id;
+      
+      // Admin and Staff join general medical record room
+      if (userRole === 'Admin' || userRole === 'Staff') {
+        socket.join('medicalRecords:all');
+      }
+      // Dentist joins their own medical record room
+      if (userRole === 'Dentist') {
+        socket.join(`medicalRecords:dentist:${userId}`);
+      }
+      // Customer joins their own medical record room
+      if (userRole === 'Customer') {
+        socket.join(`medicalRecords:customer:${userId}`);
+      }
+    });
+
+    socket.on("leaveMedicalRecordRoom", () => {
+      socket.leave('medicalRecords:all');
+      socket.leave(`medicalRecords:dentist:${socket.user.id}`);
+      socket.leave(`medicalRecords:customer:${socket.user.id}`);
+    });
+
+    // Join bill room based on user role
+    socket.on("joinBillRoom", () => {
+      const userRole = socket.user.role;
+      const userId = socket.user.id;
+      
+      // Admin and Staff join general bill room
+      if (userRole === 'Admin' || userRole === 'Staff') {
+        socket.join('bills:all');
+      }
+      // Customer joins their own bill room
+      if (userRole === 'Customer') {
+        socket.join(`bills:customer:${userId}`);
+      }
+    });
+
+    socket.on("leaveBillRoom", () => {
+      socket.leave('bills:all');
+      socket.leave(`bills:customer:${socket.user.id}`);
+    });
+
+    // Join notification room for user
+    socket.on("joinNotificationRoom", () => {
+      const userId = socket.user.id;
+      socket.join(`user:${userId}`);
+    });
+
+    socket.on("leaveNotificationRoom", () => {
+      socket.leave(`user:${socket.user.id}`);
+    });
+
     socket.on("joinConversation", (conversationId) => {
       if (!conversationId) return;
       socket.join(String(conversationId));
@@ -133,6 +188,54 @@ function emitAppointmentUpdate(appointment, eventType) {
   }
 }
 
+// Helper function to emit medical record updates
+function emitMedicalRecordUpdate(medicalRecord, eventType) {
+  if (!ioInstance) return;
+  
+  const medicalRecordData = {
+    medicalRecord,
+    eventType, // 'created', 'updated', 'completed', 'cancelled'
+    timestamp: new Date()
+  };
+
+  // Emit to all admins and staff
+  ioInstance.to('medicalRecords:all').emit('medicalRecordUpdate', medicalRecordData);
+  
+  // Emit to specific dentist
+  if (medicalRecord.dentistId) {
+    const dentistId = medicalRecord.dentistId._id || medicalRecord.dentistId;
+    ioInstance.to(`medicalRecords:dentist:${dentistId}`).emit('medicalRecordUpdate', medicalRecordData);
+  }
+  
+  // Emit to specific customer
+  if (medicalRecord.customerId) {
+    const customerId = medicalRecord.customerId._id || medicalRecord.customerId;
+    ioInstance.to(`medicalRecords:customer:${customerId}`).emit('medicalRecordUpdate', medicalRecordData);
+  }
+}
+
+// Helper function to emit bill updates
+function emitBillUpdate(bill, eventType) {
+  if (!ioInstance) return;
+  
+  const billData = {
+    bill,
+    eventType, // 'created', 'updated', 'paid', 'cancelled'
+    timestamp: new Date()
+  };
+
+  // Emit to all admins and staff
+  ioInstance.to('bills:all').emit('billUpdate', billData);
+  
+  // Emit to specific customer
+  if (bill.customerId) {
+    const customerId = bill.customerId._id || bill.customerId;
+    ioInstance.to(`bills:customer:${customerId}`).emit('billUpdate', billData);
+  }
+}
+
 module.exports = initSocket;
 module.exports.getIo = () => ioInstance;
 module.exports.emitAppointmentUpdate = emitAppointmentUpdate;
+module.exports.emitMedicalRecordUpdate = emitMedicalRecordUpdate;
+module.exports.emitBillUpdate = emitBillUpdate;

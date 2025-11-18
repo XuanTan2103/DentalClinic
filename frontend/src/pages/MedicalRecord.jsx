@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import axios from 'axios';
 import styles from './MedicalRecord.module.css';
 import Sidebar from '../components/Sidebar';
@@ -10,6 +10,7 @@ import CreateMedicalRecord from '../components/CreateMedicalRecord';
 import ConfirmDelete from "../components/ConfirmDelete";
 import { Trash2 } from 'lucide-react';
 import { jwtDecode } from "jwt-decode";
+import { io } from 'socket.io-client';
 
 const MedicalRecord = () => {
     const [records, setRecords] = useState([]);
@@ -23,6 +24,7 @@ const MedicalRecord = () => {
     const [selectedMedicalRecordId, setSelectedMedicalRecordId] = useState(null);
     const [api, contextHolder] = notification.useNotification();
     const [role, setRole] = useState(null);
+    const socketRef = useRef(null);
 
     const token = localStorage.getItem("token");
     useEffect(() => {
@@ -97,6 +99,75 @@ const MedicalRecord = () => {
         fetchRecords();
     }, [fetchRecords]);
 
+    // Socket connection for real-time updates
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const socket = io('http://localhost:5000', {
+            auth: { token },
+        });
+
+        socketRef.current = socket;
+
+        socket.on('connect', () => {
+            socket.emit('joinMedicalRecordRoom');
+        });
+
+        socket.on('medicalRecordUpdate', (data) => {
+            const { medicalRecord, eventType } = data;
+            
+            if (eventType === 'completed') {
+                // Update existing record or add new one
+                setRecords((prev) => {
+                    const existingIndex = prev.findIndex(r => r._id === medicalRecord._id);
+                    if (existingIndex >= 0) {
+                        // Update existing record
+                        const updated = [...prev];
+                        updated[existingIndex] = { ...updated[existingIndex], ...medicalRecord };
+                        return updated;
+                    } else {
+                        // Add new record if not exists
+                        return [medicalRecord, ...prev];
+                    }
+                });
+            } else if (eventType === 'created') {
+                // Add new record to the list
+                setRecords((prev) => {
+                    // Check if record already exists to avoid duplicates
+                    if (prev.some(r => r._id === medicalRecord._id)) {
+                        return prev;
+                    }
+                    return [medicalRecord, ...prev];
+                });
+            } else if (eventType === 'cancelled') {
+                // Update existing record
+                setRecords((prev) =>
+                    prev.map((r) =>
+                        r._id === medicalRecord._id ? { ...r, ...medicalRecord } : r
+                    )
+                );
+            }
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Socket disconnected');
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error('Socket connection error:', error);
+        });
+
+        // Cleanup on unmount
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.emit('leaveMedicalRecordRoom');
+                socketRef.current.disconnect();
+                socketRef.current = null;
+            }
+        };
+    }, [token]);
+
     const handleDelete = async (id) => {
         try {
             await axios.delete(`http://localhost:5000/medicalRecord/delete-medical-record/${id}`, {
@@ -113,18 +184,21 @@ const MedicalRecord = () => {
     };
 
     const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
         const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'N/A';
         return new Intl.DateTimeFormat('vi-VN', {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',
-            // hour: '2-digit',
-            // minute: '2-digit',
         }).format(date);
     };
 
     const toVN = (t) => {
-        return new Date(t).toLocaleTimeString("vi-VN", {
+        if (!t) return 'N/A';
+        const date = new Date(t);
+        if (isNaN(date.getTime())) return 'N/A';
+        return date.toLocaleTimeString("vi-VN", {
             hour: "2-digit",
             minute: "2-digit",
             timeZone: "Asia/Ho_Chi_Minh"

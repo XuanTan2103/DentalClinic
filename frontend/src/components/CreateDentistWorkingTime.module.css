@@ -483,3 +483,19 @@
     padding: 12px;
   }
 }
+
+@media (max-width: 400px) {
+  .modalOverlay {
+    padding: 6px;
+  }
+
+  .modalHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .modalActions {
+    gap: 8px;
+  }
+}

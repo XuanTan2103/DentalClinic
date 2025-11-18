@@ -160,6 +160,57 @@
   font-size: 14px;
 }
 
+@media (max-width: 600px) {
+  .messengerContainer,
+  .chatBotContainer {
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .chatWindow {
+    width: calc(100% - 32px);
+    height: 70vh;
+    right: 16px;
+    bottom: 16px;
+    border-radius: 16px;
+  }
+
+  .chatHeader {
+    padding: 12px;
+  }
+
+  .chatBody {
+    padding: 12px;
+  }
+
+  .chatInputWrapper {
+    padding: 10px;
+  }
+
+  .chatInput {
+    font-size: 13px;
+  }
+
+  .sendButton {
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  .chatWindow {
+    width: calc(100% - 24px);
+    height: 80vh;
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .messengerButton {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+
 .pulse {
   animation: pulse 2s infinite;
 }

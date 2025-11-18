@@ -524,3 +524,31 @@
     min-width: 100%;
   }
 }
+
+@media (max-width: 520px) {
+  .appointment {
+    flex-direction: column;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .controls {
+    justify-content: flex-start;
+  }
+
+  .addButton {
+    width: 100%;
+  }
+
+  .appointmentsList {
+    border-radius: 0.5rem;
+  }
+
+  .actionButton {
+    width: 100%;
+    justify-content: center;
+  }
+}

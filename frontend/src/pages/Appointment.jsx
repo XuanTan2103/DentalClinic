@@ -116,20 +116,7 @@ const Appointment = () => {
     socket.on('appointmentUpdate', (data) => {
       const { appointment, eventType } = data;
       
-      // Get current user ID to avoid duplicate notifications for own actions
-      let currentUserId = null;
-      try {
-        const token = localStorage.getItem('token');
-        if (token) {
-          const decoded = jwtDecode(token);
-          currentUserId = String(decoded.userId || decoded.id);
-        }
-      } catch (e) {
-        // Ignore decode errors
-      }
-      
       if (eventType === 'created') {
-        // Add new appointment to the list
         setAppointments((prev) => {
           // Check if appointment already exists to avoid duplicates
           if (prev.some(apt => apt._id === appointment._id)) {
@@ -137,11 +124,6 @@ const Appointment = () => {
           }
           return [appointment, ...prev];
         });
-        // Only show notification if it's not created by current user (they already see the success message)
-        const appointmentCustomerId = String(appointment.customerId?._id || appointment.customerId || '');
-        if (currentUserId && appointmentCustomerId !== currentUserId) {
-          openNotification("success", "New appointment created!");
-        }
       } else if (eventType === 'updated' || eventType === 'confirmed' || eventType === 'rejected') {
         // Update existing appointment
         setAppointments((prev) =>
@@ -149,20 +131,9 @@ const Appointment = () => {
             apt._id === appointment._id ? appointment : apt
           )
         );
-        // Show notification for status changes (user will see their own action's notification already)
-        if (eventType === 'confirmed') {
-          openNotification("success", "Appointment confirmed!");
-        } else if (eventType === 'rejected') {
-          openNotification("error", "Appointment rejected!");
-        }
       } else if (eventType === 'deleted') {
         // Remove appointment from list
         setAppointments((prev) => prev.filter((apt) => apt._id !== appointment._id));
-        // Only show notification if it's not deleted by current user
-        const appointmentCustomerId = String(appointment.customerId?._id || appointment.customerId || '');
-        if (currentUserId && appointmentCustomerId !== currentUserId) {
-          openNotification("success", "Appointment deleted!");
-        }
       }
     });
 

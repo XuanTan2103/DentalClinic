@@ -589,6 +589,14 @@
     font-weight: 500;
 }
 
+.billCancelReason {
+    color: #d32f2f;
+    font-weight: 500;
+    font-style: italic;
+    word-wrap: break-word;
+    text-align: right;
+}
+
 .billDiscount {
     color: #16a34a;
     font-weight: 600;
@@ -663,5 +671,69 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+}
+
+@media (max-width: 520px) {
+  .container {
+    padding: 12px;
+  }
+
+  .patientCard,
+  .medicalRecords {
+    padding: 16px;
+  }
+
+  .avatar,
+  .avatarImg {
+    width: 140px;
+    height: 140px;
+  }
+
+  .changeAvatarBtn {
+    left: 100px;
+    bottom: 32px;
+  }
+
+  .buttonContainer {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .changePasswordBtn,
+  .logoutBtn,
+  .editProfileBtn {
+    width: 100%;
+    justify-content: center;
+    margin: 0;
+  }
+
+  .recordsHeader {
+    gap: 12px;
+  }
+
+  .headerButtons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .scheduleBtn,
+  .appointmentBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .recordCard,
+  .appointmentCard {
+    padding: 16px;
+  }
+
+  .recordDetails,
+  .appointmentDetails {
+    padding: 10px 0;
+  }
+
+  .billSection {
+    padding: 12px;
   }
 }
