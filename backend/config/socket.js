@@ -170,7 +170,7 @@ function emitAppointmentUpdate(appointment, eventType) {
   
   const appointmentData = {
     appointment,
-    eventType, // 'created', 'updated', 'deleted', 'confirmed', 'rejected'
+    eventType,
     timestamp: new Date()
   };
 

@@ -95,39 +95,31 @@ const Payment = () => {
 
         const handleBillUpdate = (data) => {
             const { bill, eventType } = data;
-
-            // Get current user ID to avoid duplicate notifications for own actions
             let currentUserId = null;
             try {
                 const decoded = jwtDecode(token);
                 currentUserId = String(decoded.userId || decoded.id);
             } catch (e) {
-                // Ignore decode errors
+                console.error('Error decoding token:', e);
             }
 
             if (eventType === 'paid') {
-                // Update existing bill or add new one
                 setBills((prev) => {
                     const existingIndex = prev.findIndex(b => b._id === bill._id);
                     if (existingIndex >= 0) {
-                        // Update existing bill
                         const updated = [...prev];
                         updated[existingIndex] = { ...updated[existingIndex], ...bill };
                         return updated;
                     } else {
-                        // Add new bill if not exists
                         return [bill, ...prev];
                     }
                 });
-                // Only show notification if it's not paid by current user (they already see the success message)
                 const billCustomerId = String(bill.customerId?._id || bill.customerId || '');
                 if (currentUserId && billCustomerId !== currentUserId) {
                     openNotification('success', 'The bill has been paid!');
                 }
             } else if (eventType === 'created') {
-                // Add new bill to the list
                 setBills((prev) => {
-                    // Check if bill already exists to avoid duplicates
                     if (prev.some(b => b._id === bill._id)) {
                         return prev;
                     }

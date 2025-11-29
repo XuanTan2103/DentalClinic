@@ -345,7 +345,6 @@ const dentistWorkingTimeController = {
         isFixed: !!isFixed
       };
 
-      // CASE: fixed schedule (isFixed = true) => date must be null
       if (isFixed) {
         const existingFixed = await DentistWorkingTime.findOne({
           dentistId,
@@ -371,7 +370,6 @@ const dentistWorkingTimeController = {
         updateData.isFixed = true;
         updateData.workingDays = workingDays;
       } else {
-        // CASE: special schedule => date required and must be >= tomorrow (VN time)
         if (!date) {
           return res.status(400).json({ message: "Date is required for special schedule" });
         }
@@ -473,20 +471,16 @@ const dentistWorkingTimeController = {
         return res.status(400).json({ message: "Date (YYYY-MM-DD) is required" });
       }
 
-      // Chuẩn hóa "ngày" theo VN -> mốc 00:00 VN (UTC)
       const targetDate = vnDateOnlyToUTC(date);
 
-      // 1) Ưu tiên lịch đặc biệt của đúng ngày
       let workingTime = await DentistWorkingTime.findOne({ dentistId, isFixed: false, date: targetDate });
 
-      // 2) Nếu không có, dùng lịch cố định nếu ngày đó thuộc workingDays
       if (!workingTime) {
         const fixed = await DentistWorkingTime.findOne({ dentistId, isFixed: true });
         if (!fixed) {
           return res.status(404).json({ message: "No working time found" });
         }
-        const dow = vnDayOfWeek1to7(date); // 1..7
-        // Nếu ngày này KHÔNG thuộc workingDays => nghỉ
+        const dow = vnDayOfWeek1to7(date); 
         if (!Array.isArray(fixed.workingDays) || !fixed.workingDays.includes(dow)) {
           return res.status(200).json({
             message: "Get free time ranges successfully",
@@ -498,7 +492,6 @@ const dentistWorkingTimeController = {
         workingTime = fixed;
       }
 
-      // Nếu đánh dấu đóng cửa => không có slot trống
       if (workingTime.isClosed) {
         return res.status(200).json({
           message: "Get free time ranges successfully",
@@ -508,18 +501,15 @@ const dentistWorkingTimeController = {
         });
       }
 
-      // Lấy các lịch hẹn của ngày đó
       const appointments = await Appointment.find({ dentistId, date: targetDate });
 
-      // Chuẩn hóa booked intervals (phút trong ngày theo VN)
       const booked = appointments.map(app => ({
         start: minutesOfDayInVN(app.startTime),
         end: minutesOfDayInVN(app.endTime),
       }))
-        .filter(b => b.end > b.start)           // loại bỏ dữ liệu xấu
+        .filter(b => b.end > b.start)           
         .sort((a, b) => a.start - b.start);
 
-      // Merge overlap của toàn bộ booked trong ngày (đơn giản hóa)
       const merged = [];
       for (const b of booked) {
         if (!merged.length || b.start > merged[merged.length - 1].end) {
@@ -529,23 +519,20 @@ const dentistWorkingTimeController = {
         }
       }
 
-      // Hàm cắt khoảng trống trong một ca
       const freeInShift = (shift) => {
         if (!shift?.startTime || !shift?.endTime) return [];
         const S = toMinutesHHMM(shift.startTime);
         const E = toMinutesHHMM(shift.endTime);
         if (!(S < E)) return [];
 
-        // Cắt các booked vào [S,E]
         const clipped = [];
         for (const b of merged) {
           const s = Math.max(b.start, S);
           const e = Math.min(b.end, E);
           if (e > s) clipped.push({ start: s, end: e });
-          if (b.start >= E) break; // tối ưu: vì merged đã sort
+          if (b.start >= E) break; 
         }
 
-        // Tạo khoảng trống từ [S,E] loại trừ clipped
         const free = [];
         let cursor = S;
         for (const c of clipped) {
@@ -554,7 +541,6 @@ const dentistWorkingTimeController = {
         }
         if (cursor < E) free.push({ start: cursor, end: E });
 
-        // Đổi sang "HH:mm"
         return free.map(r => ({ start: toHHMM(r.start), end: toHHMM(r.end) }));
       };
 

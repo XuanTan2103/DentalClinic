@@ -64,17 +64,14 @@ const billController = {
 
             const updated = await bill.save();
 
-            // Populate bill for socket emission
             const populatedBill = await Bill.findById(updated._id)
                 .populate('customerId', 'fullName phoneNumber email')
                 .populate('staffId', 'fullName email')
                 .populate('dentistId', 'fullName email')
                 .lean();
 
-            // Emit socket event for real-time update
             try {
                 if (populatedBill) {
-                    // Convert Decimal128 to numbers for frontend
                     const convert = v => (v && v.$numberDecimal ? Number(v.$numberDecimal) : Number(v || 0));
                     populatedBill.totalAmount = convert(populatedBill.totalAmount);
                     populatedBill.discountAmount = convert(populatedBill.discountAmount);
@@ -320,17 +317,14 @@ const billController = {
 
             const updated = await bill.save();
 
-            // Populate bill for socket emission
             const populatedBill = await Bill.findById(updated._id)
                 .populate('customerId', 'fullName phoneNumber email')
                 .populate('staffId', 'fullName email')
                 .populate('dentistId', 'fullName email')
                 .lean();
 
-            // Emit socket event for real-time update
             try {
                 if (populatedBill) {
-                    // Convert Decimal128 to numbers for frontend
                     const convert = v => (v && v.$numberDecimal ? Number(v.$numberDecimal) : Number(v || 0));
                     populatedBill.totalAmount = convert(populatedBill.totalAmount);
                     populatedBill.discountAmount = convert(populatedBill.discountAmount);

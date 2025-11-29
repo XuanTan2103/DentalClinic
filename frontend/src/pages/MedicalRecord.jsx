@@ -99,7 +99,6 @@ const MedicalRecord = () => {
         fetchRecords();
     }, [fetchRecords]);
 
-    // Socket connection for real-time updates
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -118,30 +117,24 @@ const MedicalRecord = () => {
             const { medicalRecord, eventType } = data;
             
             if (eventType === 'completed') {
-                // Update existing record or add new one
                 setRecords((prev) => {
                     const existingIndex = prev.findIndex(r => r._id === medicalRecord._id);
                     if (existingIndex >= 0) {
-                        // Update existing record
                         const updated = [...prev];
                         updated[existingIndex] = { ...updated[existingIndex], ...medicalRecord };
                         return updated;
                     } else {
-                        // Add new record if not exists
                         return [medicalRecord, ...prev];
                     }
                 });
             } else if (eventType === 'created') {
-                // Add new record to the list
                 setRecords((prev) => {
-                    // Check if record already exists to avoid duplicates
                     if (prev.some(r => r._id === medicalRecord._id)) {
                         return prev;
                     }
                     return [medicalRecord, ...prev];
                 });
             } else if (eventType === 'cancelled') {
-                // Update existing record
                 setRecords((prev) =>
                     prev.map((r) =>
                         r._id === medicalRecord._id ? { ...r, ...medicalRecord } : r

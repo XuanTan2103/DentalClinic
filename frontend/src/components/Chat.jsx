@@ -11,28 +11,24 @@ function Chat({ isOpen, onToggle, isOtherOpen }) {
   const [socket, setSocket] = useState(null);
   const messagesEndRef = useRef(null);
 
-  // Auto scroll xuống cuối khi có message mới
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Kết nối socket khi mở chat
   useEffect(() => {
     if (isOpen) {
       const newSocket = io("http://localhost:5000", {
         auth: {
-          token: localStorage.getItem("token"), // JWT token
+          token: localStorage.getItem("token"), 
         },
       });
 
       setSocket(newSocket);
 
-      // Join conversation khi đã biết conversationId
       if (conversationId) {
         newSocket.emit("joinConversation", conversationId);
       }
 
-      // Nhận message realtime (chống trùng lặp theo _id)
       newSocket.on("newMessage", (msg) => {
         setMessages((prev) => (prev.some((m) => m._id === msg._id) ? prev : [...prev, msg]));
       });
@@ -43,7 +39,6 @@ function Chat({ isOpen, onToggle, isOtherOpen }) {
     }
   }, [isOpen, conversationId]);
 
-  // Khi mở chat lần đầu → lấy conversation & messages
   useEffect(() => {
     if (isOpen) {
       axios
@@ -54,7 +49,6 @@ function Chat({ isOpen, onToggle, isOtherOpen }) {
           if (res.data.conversation) {
             setConversationId(res.data.conversation._id);
 
-            // lấy toàn bộ messages
             return axios.get(
               `http://localhost:5000/message/conversation/${res.data.conversation._id}`,
               {
@@ -92,7 +86,6 @@ function Chat({ isOpen, onToggle, isOtherOpen }) {
       setMessages((prev) => (prev.some((m) => m._id === newMsg._id) ? prev : [...prev, newMsg]));
       setInput("");
 
-      // Sau khi có conversation mới thì join vào socket room
       if (!conversationId) {
         setConversationId(res.data.conversationId);
         socket?.emit("joinConversation", res.data.conversationId);

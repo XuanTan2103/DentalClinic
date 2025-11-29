@@ -48,7 +48,6 @@ const conversationController = {
         .populate("lastSender", "fullName")
         .sort({ updatedAt: -1 });
 
-      // Tính unreadCount cho từng conversation
       const conversationsWithUnread = await Promise.all(
         convs.map(async (c) => {
           const customerId = c.customerId?._id || c.customerId;

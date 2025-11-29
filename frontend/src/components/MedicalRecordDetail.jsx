@@ -86,7 +86,7 @@ const InlineSelect = memo(function InlineSelect({
                   <div
                     key={it._id}
                     className={`${styles.panelItem} ${active ? styles.panelItemSelected : ''}`}
-                    onMouseDown={(e) => e.preventDefault()} // giữ focus trong ô search khi click item
+                    onMouseDown={(e) => e.preventDefault()} 
                     onClick={() => setSelectedItem(active ? null : it)}
                     role="button"
                     tabIndex={0}

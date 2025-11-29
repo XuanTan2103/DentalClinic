@@ -18,10 +18,9 @@ const transporter = nodemailer.createTransport({
 const VN_OFFSET_MIN = 7 * 60;
 const MS_PER_MIN = 60 * 1000;
 
-// Trả về "YYYY-MM-DD" theo lịch VN từ mọi input (string ISO hoặc Date)
 function ensureYMD_VN(input) {
     if (typeof input === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(input)) return input;
-    const d = new Date(input); // parse ISO hoặc millis
+    const d = new Date(input); 
     if (Number.isNaN(d.getTime())) throw new Error('Invalid date input');
     const vn = new Date(d.getTime() + VN_OFFSET_MIN * MS_PER_MIN);
     const y = vn.getUTCFullYear();
@@ -30,17 +29,14 @@ function ensureYMD_VN(input) {
     return `${y}-${m}-${day}`;
 }
 
-// Mốc 00:00 của ngày đó theo VN → Date(UTC) để lưu/so sánh trong DB
 function vnDateOnlyToUTC(ymd /* 'YYYY-MM-DD' */) {
     return new Date(`${ymd}T00:00:00.000+07:00`);
 }
 
-// Ghép "YYYY-MM-DD" + "HH:mm" thành Date theo VN (UTC+7)
 function combineDateTimeVN(ymd, hhmm /* 'HH:mm' */) {
     return new Date(`${ymd}T${hhmm}:00.000+07:00`);
 }
 
-// Thứ của ngày lịch (1..7, CN=1) — KHÔNG phụ thuộc TZ máy
 function dayOfWeek_1to7(ymd) {
     const dow0 = new Date(`${ymd}T00:00:00Z`).getUTCDay(); // 0..6
     return dow0 === 0 ? 1 : dow0 + 1;
@@ -111,7 +107,6 @@ const appointmentController = {
             const { dentistId, startTime, date, note, services } = req.body;
             const userId = req.user.id;
 
-            // 1) Validate cơ bản
             if (!dentistId) return res.status(400).json({ message: "DentistId is required" });
             if (!startTime) return res.status(400).json({ message: "Start time is required" });
             if (!date) return res.status(400).json({ message: "Date is required" });
@@ -125,7 +120,6 @@ const appointmentController = {
                 return res.status(400).json({ message: 'Invalid userId' });
             }
 
-            // 2) Tồn tại user/dentist + đúng role
             const customer = await User.findById(userId);
             const dentist = await User.findById(dentistId);
             if (!customer) return res.status(404).json({ message: 'User not found' });
@@ -133,7 +127,6 @@ const appointmentController = {
                 return res.status(404).json({ message: 'Dentist not found' });
             }
 
-            // 3) Lấy dịch vụ & tổng thời lượng
             const serviceDetails = await Service.find({ _id: { $in: services } });
             if (serviceDetails.length !== services.length) {
                 return res.status(404).json({ message: 'One or more services not found' });
@@ -143,18 +136,15 @@ const appointmentController = {
                 return res.status(400).json({ message: 'Total duration must be > 0' });
             }
 
-            // 4) Chuẩn hoá ngày theo VN
             const ymd = ensureYMD_VN(date);             // 'YYYY-MM-DD'
             const start = combineDateTimeVN(ymd, startTime);
             const end = new Date(start.getTime() + totalDuration * 60000);
-            const normalizedDate = vnDateOnlyToUTC(ymd); // mốc 00:00 VN (UTC) — dùng cho DB
+            const normalizedDate = vnDateOnlyToUTC(ymd); 
 
-            // 5) Rào thời gian (theo UTC — ok vì start/end đã là thời điểm chuẩn +07:00)
             const now = new Date();
             if (start < now) {
                 return res.status(400).json({ message: "Cannot book an appointment in the past" });
             }
-            // hôm nay phải đặt trước 30'
             const ymdNowVN = ensureYMD_VN(now);
             if (ymd === ymdNowVN) {
                 const minStart = new Date(now.getTime() + 30 * 60000);
@@ -162,14 +152,12 @@ const appointmentController = {
                     return res.status(400).json({ message: "Appointments today must be booked at least 30 minutes in advance" });
                 }
             }
-            // không quá 3 tháng
             const threeMonthsLater = new Date(now);
             threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
             if (start > threeMonthsLater) {
                 return res.status(400).json({ message: "Cannot book an appointment more than 3 months in advance" });
             }
 
-            // 6) Lấy working time — ƯU TIÊN LỊCH ĐẶC BIỆT
             const special = await DentistWorkingTime.findOne({ dentistId, isFixed: false, date: normalizedDate });
             let workingTime = special;
             if (!workingTime) {
@@ -177,7 +165,6 @@ const appointmentController = {
                 if (!fixed) {
                     return res.status(400).json({ message: "Dentist is not working on this day" });
                 }
-                // kiểm tra thứ của ngày đặt có thuộc workingDays của fixed
                 const dow = dayOfWeek_1to7(ymd);
                 if (!Array.isArray(fixed.workingDays) || !fixed.workingDays.includes(dow)) {
                     return res.status(400).json({ message: "Dentist does not work on this day" });
@@ -185,12 +172,10 @@ const appointmentController = {
                 workingTime = fixed;
             }
 
-            // 7) Nếu ngày đặc biệt đóng cửa → chặn ngay
             if (workingTime.isClosed) {
                 return res.status(400).json({ message: "Dentist is not working on this day (day off)" });
             }
 
-            // 8) Giới hạn phải nằm TRONG MỘT CA (sáng hoặc chiều) — nếu chỉ có sáng thì đặt chiều sẽ fail
             const toBound = (hm) => (hm ? combineDateTimeVN(ymd, hm) : null);
             const morningStart = toBound(workingTime.morning?.startTime);
             const morningEnd = toBound(workingTime.morning?.endTime);
@@ -203,7 +188,6 @@ const appointmentController = {
                 return res.status(400).json({ message: "Appointment time is outside of working hours" });
             }
 
-            // 9) Conflict: cùng nha sĩ, cùng ngày, có overlap
             const conflict = await Appointment.findOne({
                 dentistId,
                 date: normalizedDate,
@@ -215,7 +199,6 @@ const appointmentController = {
                 return res.status(400).json({ message: "Dentist already has an appointment in this time" });
             }
 
-            // 10) Tạo appointment
             const appointment = new Appointment({
                 customerId: userId,
                 dentistId,
@@ -228,7 +211,6 @@ const appointmentController = {
 
             await appointment.save();
             
-            // Emit socket event for real-time update
             try {
                 const formattedAppointment = await formatAppointmentForSocket(appointment);
                 if (formattedAppointment) {
@@ -238,7 +220,6 @@ const appointmentController = {
                 console.error('Error emitting appointment create event:', socketError);
             }
 
-            // Create notification for staff
             try {
                 await notifyNewAppointment(appointment);
             } catch (notifError) {
@@ -256,7 +237,6 @@ const appointmentController = {
         try {
             const { customerId, dentistId, startTime, date, note, services } = req.body;
 
-            // 1) Validate cơ bản
             if (!customerId) return res.status(400).json({ message: "CustomerId is required" });
             if (!dentistId) return res.status(400).json({ message: "DentistId is required" });
             if (!startTime) return res.status(400).json({ message: "Start time is required" });
@@ -271,7 +251,6 @@ const appointmentController = {
                 return res.status(400).json({ message: 'Invalid customerId' });
             }
 
-            // 2) Tồn tại user/dentist + đúng role
             const customer = await User.findById(customerId);
             const dentist = await User.findById(dentistId);
             if (!customer) return res.status(404).json({ message: 'User not found' });
@@ -279,7 +258,6 @@ const appointmentController = {
                 return res.status(404).json({ message: 'Dentist not found' });
             }
 
-            // 3) Lấy dịch vụ & tổng thời lượng
             const serviceDetails = await Service.find({ _id: { $in: services } });
             if (serviceDetails.length !== services.length) {
                 return res.status(404).json({ message: 'One or more services not found' });
@@ -289,18 +267,15 @@ const appointmentController = {
                 return res.status(400).json({ message: 'Total duration must be > 0' });
             }
 
-            // 4) Chuẩn hoá ngày theo VN
             const ymd = ensureYMD_VN(date);             // 'YYYY-MM-DD'
             const start = combineDateTimeVN(ymd, startTime);
             const end = new Date(start.getTime() + totalDuration * 60000);
-            const normalizedDate = vnDateOnlyToUTC(ymd); // mốc 00:00 VN (UTC) — dùng cho DB
+            const normalizedDate = vnDateOnlyToUTC(ymd);
 
-            // 5) Rào thời gian (theo UTC — ok vì start/end đã là thời điểm chuẩn +07:00)
             const now = new Date();
             if (start < now) {
                 return res.status(400).json({ message: "Cannot book an appointment in the past" });
             }
-            // hôm nay phải đặt trước 30'
             const ymdNowVN = ensureYMD_VN(now);
             if (ymd === ymdNowVN) {
                 const minStart = new Date(now.getTime() + 30 * 60000);
@@ -308,14 +283,12 @@ const appointmentController = {
                     return res.status(400).json({ message: "Appointments today must be booked at least 30 minutes in advance" });
                 }
             }
-            // không quá 3 tháng
             const threeMonthsLater = new Date(now);
             threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
             if (start > threeMonthsLater) {
                 return res.status(400).json({ message: "Cannot book an appointment more than 3 months in advance" });
             }
 
-            // 6) Lấy working time — ƯU TIÊN LỊCH ĐẶC BIỆT
             const special = await DentistWorkingTime.findOne({ dentistId, isFixed: false, date: normalizedDate });
             let workingTime = special;
             if (!workingTime) {
@@ -323,7 +296,6 @@ const appointmentController = {
                 if (!fixed) {
                     return res.status(400).json({ message: "Dentist is not working on this day" });
                 }
-                // kiểm tra thứ của ngày đặt có thuộc workingDays của fixed
                 const dow = dayOfWeek_1to7(ymd);
                 if (!Array.isArray(fixed.workingDays) || !fixed.workingDays.includes(dow)) {
                     return res.status(400).json({ message: "Dentist does not work on this day" });
@@ -331,12 +303,10 @@ const appointmentController = {
                 workingTime = fixed;
             }
 
-            // 7) Nếu ngày đặc biệt đóng cửa → chặn ngay
             if (workingTime.isClosed) {
                 return res.status(400).json({ message: "Dentist is not working on this day (day off)" });
             }
 
-            // 8) Giới hạn phải nằm TRONG MỘT CA (sáng hoặc chiều) — nếu chỉ có sáng thì đặt chiều sẽ fail
             const toBound = (hm) => (hm ? combineDateTimeVN(ymd, hm) : null);
             const morningStart = toBound(workingTime.morning?.startTime);
             const morningEnd = toBound(workingTime.morning?.endTime);
@@ -349,7 +319,6 @@ const appointmentController = {
                 return res.status(400).json({ message: "Appointment time is outside of working hours" });
             }
 
-            // 9) Conflict: cùng nha sĩ, cùng ngày, có overlap
             const conflict = await Appointment.findOne({
                 dentistId,
                 date: normalizedDate,
@@ -361,7 +330,6 @@ const appointmentController = {
                 return res.status(400).json({ message: "Dentist already has an appointment in this time" });
             }
 
-            // 10) Tạo appointment
             const appointment = new Appointment({
                 customerId,
                 dentistId,
@@ -374,7 +342,6 @@ const appointmentController = {
 
             await appointment.save();
             
-            // Emit socket event for real-time update
             try {
                 const formattedAppointment = await formatAppointmentForSocket(appointment);
                 if (formattedAppointment) {
@@ -384,7 +351,6 @@ const appointmentController = {
                 console.error('Error emitting appointment create event:', socketError);
             }
 
-            // Create notification for staff
             try {
                 await notifyNewAppointment(appointment);
             } catch (notifError) {
@@ -409,7 +375,6 @@ const appointmentController = {
                 return res.status(404).json({ message: 'Appointment not found' });
             }
             
-            // Emit socket event for real-time update
             try {
                 const formattedAppointment = await formatAppointmentForSocket(deleted);
                 if (formattedAppointment) {
@@ -518,7 +483,6 @@ const appointmentController = {
             };
             await appointment.save();
             
-            // Emit socket event for real-time update
             try {
                 const formattedAppointment = await formatAppointmentForSocket(appointment);
                 if (formattedAppointment) {
@@ -528,7 +492,6 @@ const appointmentController = {
                 console.error('Error emitting appointment confirm event:', socketError);
             }
 
-            // Create notification for dentist
             try {
                 await notifyAppointmentDecision(appointment, 'confirmed');
             } catch (notifError) {
@@ -632,7 +595,6 @@ const appointmentController = {
             };
             await appointment.save();
             
-            // Emit socket event for real-time update
             try {
                 const formattedAppointment = await formatAppointmentForSocket(appointment);
                 if (formattedAppointment) {
@@ -642,7 +604,6 @@ const appointmentController = {
                 console.error('Error emitting appointment reject event:', socketError);
             }
 
-            // Create notification for dentist
             try {
                 await notifyAppointmentDecision(appointment, 'rejected');
             } catch (notifError) {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import styles from './Login.module.css';
 import { Eye, EyeOff, Mail, Lock, Heart } from 'lucide-react';
 import axios from 'axios';
@@ -121,9 +121,12 @@ function Login() {
 
             {/* Forgot Password */}
             <div className={styles.forgotPassword}>
-              <a href="/forgot-password" className={styles.forgotLink}>
+              <Link 
+                to="/forgot-password" 
+                className={styles.forgotLink}
+              >
                 Forgot Password?
-              </a>
+              </Link>
             </div>
 
             {/* Login Button */}
@@ -147,9 +150,12 @@ function Login() {
           <div className={styles.registerSection}>
             <p className={styles.registerText}>
               No account yet?{' '}
-              <a href="/register" className={styles.registerLink}>
+              <Link 
+                to="/register" 
+                className={styles.registerLink}
+              >
                 Sign up now
-              </a>
+              </Link>
             </p>
           </div>
         </div>
