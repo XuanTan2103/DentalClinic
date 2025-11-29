@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import styles from "./NotFound.module.css"
 
 function NotFound() {
@@ -17,12 +18,18 @@ function NotFound() {
         </div>
 
         <div className={styles.actions}>
-          <a href="/home" className={styles.primaryButton}>
+          <Link 
+            to="/home" 
+            className={styles.primaryButton}
+          >
             Back to home page
-          </a>
-          <a href="/contact" className={styles.secondaryButton}>
+          </Link>
+          <Link 
+            to="/contact" 
+            className={styles.secondaryButton}
+          >
             Contact support
-          </a>
+          </Link>
         </div>
 
         <div className={styles.decorativeElements}>

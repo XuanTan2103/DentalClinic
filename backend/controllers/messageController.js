@@ -1,4 +1,3 @@
-// controllers/messageController.js
 const Message = require("../models/Message");
 const Conversation = require("../models/Conversation");
 const conversationController = require("./conversationController");

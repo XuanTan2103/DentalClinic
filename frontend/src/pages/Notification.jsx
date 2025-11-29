@@ -88,8 +88,6 @@ const Notification = () => {
             const { notification: newNotif } = data;
             setNotifications(prev => [newNotif, ...prev]);
             setUnreadCount(prev => prev + 1);
-
-            // Show browser notification
             if ('Notification' in window && Notification.permission === 'granted') {
                 new Notification(newNotif.title, {
                     body: newNotif.message,
@@ -130,7 +128,6 @@ const Notification = () => {
                 )
             );
             setUnreadCount(prev => Math.max(0, prev - 1));
-            // Emit event to update Sidebar badge
             window.dispatchEvent(new Event('notificationRead'));
         } catch (error) {
             console.error('Error marking notification as read:', error);
@@ -148,7 +145,6 @@ const Notification = () => {
                 prev.map(notif => ({ ...notif, isRead: true }))
             );
             setUnreadCount(0);
-            // Emit event to update Sidebar badge
             window.dispatchEvent(new Event('notificationRead'));
             openNotification('success', 'All notifications marked as read');
         } catch (error) {
@@ -175,8 +171,6 @@ const Notification = () => {
         if (!notif.isRead) {
             handleMarkAsRead(notif._id);
         }
-
-        // Navigate based on notification type
         if (notif.type === 'new_appointment' || notif.type === 'appointment_confirmed' || notif.type === 'appointment_rejected') {
             navigate('/appointment');
         } else if (notif.type === 'new_bill') {

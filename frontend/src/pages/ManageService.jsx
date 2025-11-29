@@ -34,10 +34,7 @@ function ManageService() {
     console.log("Editing service:", service)
   }
 
-  const activeServices = services.filter((service) => service.status === "active").length
-  const totalRevenue = services
-    .filter((service) => service.status === "active")
-    .reduce((sum, service) => sum + Number.parseInt(service.price.replace(/,/g, "")), 0)
+  const totalRevenue = services.reduce((sum, s) => sum + Number(s.price || 0), 0);
 
   const filteredServices = services.filter((service) => {
     const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -159,8 +156,7 @@ function ManageService() {
             </div>
             <div>
               <div className={styles.statNumber}>{services.length}</div>
-              <div className={styles.statLabel}>Tổng dịch vụ</div>
-              <div className={styles.statChange}>+1 từ tháng trước</div>
+              <div className={styles.statLabel}>Total service</div>
             </div>
           </div>
 
@@ -172,9 +168,9 @@ function ManageService() {
               </svg>
             </div>
             <div>
-              <div className={styles.statNumber}>{activeServices}</div>
-              <div className={styles.statLabel}>Đang hoạt động</div>
-              <div className={styles.statChange}>80% tổng số</div>
+              <div className={styles.statNumber}>{services.length}</div>
+              <div className={styles.statLabel}>Active</div>
+              <div className={styles.statChange}>100% of the total</div>
             </div>
           </div>
 
@@ -186,8 +182,8 @@ function ManageService() {
               </svg>
             </div>
             <div>
-              <div className={styles.statNumber}>{(totalRevenue / 1000000).toFixed(1)}M</div>
-              <div className={styles.statLabel}>Tổng giá trị</div>
+              <div className={styles.statNumber}>{totalRevenue.toLocaleString("en-US")}</div>
+              <div className={styles.statLabel}>Total value</div>
               <div className={styles.statChange}>USD</div>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Mail, User, Phone, Calendar, Heart, VenusAndMars, MapPinHouse } from 'lucide-react';
 import styles from './Register.module.css';
 import axios from 'axios';
@@ -47,47 +48,7 @@ function Register() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        // // Frontend validation
-        // if (!formData.fullName || !formData.email || !formData.phoneNumber ||
-        //     !formData.dateOfBirth || !formData.gender || !formData.address) {
-        //     openNotification("error", "Vui lòng nhập đầy đủ thông tin!");
-        //     return;
-        // }
-
-        // // Validate fullName
-        // if (formData.fullName.trim().length < 2 || formData.fullName.trim().length > 50) {
-        //     openNotification("error", "Họ tên phải từ 2 đến 50 ký tự!");
-        //     return;
-        // }
-
-        // if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(formData.fullName)) {
-        //     openNotification("error", "Họ tên chỉ được chứa chữ cái và khoảng trắng!");
-        //     return;
-        // }
-
-        // // Validate phoneNumber
-        // if (!/^0[0-9]{9}$/.test(formData.phoneNumber)) {
-        //     openNotification("error", "Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số!");
-        //     return;
-        // }
-
-        // // Validate dateOfBirth
-        // const birthDate = new Date(formData.dateOfBirth);
-        // const today = new Date();
-        // if (birthDate > today) {
-        //     openNotification("error", "Ngày sinh không thể là ngày trong tương lai!");
-        //     return;
-        // }
-
-        // // Validate address
-        // if (formData.address.trim().length < 5 || formData.address.trim().length > 255) {
-        //     openNotification("error", "Địa chỉ phải từ 5 đến 255 ký tự!");
-        //     return;
-        // }
-
         setIsLoading(true);
-        
         try {
             await axios.post('http://localhost:5000/user/register', formData);
             openNotification("success");
@@ -274,9 +235,12 @@ function Register() {
                     <div className={styles.loginSection}>
                         <p className={styles.loginText}>
                             Already have an account?{' '}
-                            <a href="/" className={styles.loginLink}>
+                            <Link 
+                                to="/" 
+                                className={styles.loginLink}
+                            >
                                 Sign in now
-                            </a>
+                            </Link>
                         </p>
                     </div>
                 </div>

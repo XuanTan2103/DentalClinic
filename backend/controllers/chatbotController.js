@@ -25,7 +25,6 @@ const chatbotController = {
         return res.status(400).json({ error: "Message required" });
       }
 
-      // 1. Phân loại
       const category = await classifyMessage(message);
 
       if (category === "greetings") {
@@ -40,7 +39,6 @@ const chatbotController = {
         });
       }
 
-      // 2. Nếu là dental → gọi Gemini để trả lời
       const systemInstruction = `
 You are a virtual assistant for a dental clinic.
 - Respond briefly, politely, and clearly in English.

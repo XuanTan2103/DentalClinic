@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import styles from "./ForgotPassword.module.css";
 import { Mail, Shield, KeyRound, Check } from "lucide-react";
 import { notification } from 'antd';
@@ -18,7 +18,6 @@ const ForgotPassword = () => {
     const [api, contextHolder] = notification.useNotification();
     const navigate = useNavigate();
 
-    // Countdown for resend button
     useEffect(() => {
         let timer;
         if (countdown > 0) {
@@ -27,7 +26,6 @@ const ForgotPassword = () => {
         return () => clearTimeout(timer);
     }, [countdown]);
 
-    // Countdown for OTP expiry
     useEffect(() => {
         let timer;
         if (otpExpiry > 0) {
@@ -62,7 +60,6 @@ const ForgotPassword = () => {
         }
     };
 
-    // Request OTP (call backend here)
     const handleEmailSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -79,7 +76,6 @@ const ForgotPassword = () => {
         }
     };
 
-    // Resend OTP (call backend here)
     const handleResendOTP = async (e) => {
         e?.preventDefault();
         if (countdown > 0) return;
@@ -97,7 +93,6 @@ const ForgotPassword = () => {
         }
     };
 
-    // Verify OTP (call backend here)
     const handleOtpSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -113,7 +108,6 @@ const ForgotPassword = () => {
         }
     };
 
-    // Reset password (call backend here)
     const handlePasswordSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -327,9 +321,12 @@ const ForgotPassword = () => {
                         )}
 
                         <div className={styles.center}>
-                            <a href="/" className={styles.linkSecondary}>
+                            <Link 
+                                to="/" 
+                                className={styles.linkSecondary}
+                            >
                                 Back to home
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>

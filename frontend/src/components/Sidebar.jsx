@@ -33,7 +33,6 @@ const staffItems = [
 ];
 
 const dentistItems = [
-    { icon: BarChart3, label: "Dashboard", href: "/dashboard" },
     { icon: Users, label: "Accounts", href: "/accounts" },
     { icon: Bell, label: "Notification", href: "/notification" },
     { icon: CalendarCheck, label: "Appointment", href: "/appointment" },

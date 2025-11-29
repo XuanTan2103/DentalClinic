@@ -26,7 +26,6 @@ import Service from './pages/Service';
 const ProtectedRoute = ({ children, roles }) => {
   const token = localStorage.getItem("token");
   const rawUser = localStorage.getItem("user");
-  console.log(rawUser);
 
   if (!token) {
     return <Navigate to="/" replace />;

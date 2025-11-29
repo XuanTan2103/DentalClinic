@@ -139,7 +139,7 @@ const DentistWorkingTime = () => {
                 <div className={styles.header}>
                     <div className={styles.headerContent}>
                         <Calendar1 size={32} />
-                        <h1 className={styles.headerTitle}>Doctor's Work Schedule Management</h1>
+                        <h1 className={styles.headerTitle}>Dentist's Work Schedule Management</h1>
                     </div>
                     <p className={styles.headerSubtitle}>Manage working hours for all dentists in the clinic</p>
                 </div>

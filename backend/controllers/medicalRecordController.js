@@ -613,26 +613,22 @@ const medicalRecordController = {
       await session.commitTransaction();
       session.endSession();
 
-      // Emit socket event for real-time update
       try {
         if (updated) {
           emitMedicalRecordUpdate(updated, 'completed');
         }
-        // Also emit bill creation event
         if (bill) {
           const populatedBill = await Bill.findById(bill._id)
             .populate('customerId', 'fullName phoneNumber email')
             .populate('dentistId', 'fullName email')
             .lean();
           if (populatedBill) {
-            // Convert Decimal128 to numbers for frontend
             const convert = v => (v && v.$numberDecimal ? Number(v.$numberDecimal) : Number(v || 0));
             populatedBill.totalAmount = convert(populatedBill.totalAmount);
             populatedBill.discountAmount = convert(populatedBill.discountAmount);
             populatedBill.finalAmount = convert(populatedBill.finalAmount);
             emitBillUpdate(populatedBill, 'created');
             
-            // Create notification for staff
             const { notifyNewBill } = require('./notificationController');
             try {
               await notifyNewBill(populatedBill);

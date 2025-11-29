@@ -4,32 +4,28 @@ const User = require('../models/User');
 const Review = require('../models/Review');
 const mongoose = require('mongoose');
 
-// Helper function to convert Decimal128 to number
 const toNum = (v) =>
     typeof v === 'object' && v !== null && v._bsontype === 'Decimal128'
         ? Number(v.toString())
         : Number(v || 0);
 
-// Helper function to get date ranges
 function getDateRanges(period, dateParam) {
     let start, end;
     let targetDate;
     
     if (dateParam) {
-        // Parse date parameter (YYYY-MM-DD format) - parse as local date to avoid timezone issues
         const dateParts = dateParam.split('-');
         if (dateParts.length !== 3) {
             throw new Error('Invalid date format. Expected YYYY-MM-DD');
         }
         const year = parseInt(dateParts[0], 10);
-        const month = parseInt(dateParts[1], 10) - 1; // Month is 0-indexed
+        const month = parseInt(dateParts[1], 10) - 1; 
         const day = parseInt(dateParts[2], 10);
         targetDate = new Date(year, month, day);
         if (isNaN(targetDate.getTime())) {
             throw new Error('Invalid date format. Expected YYYY-MM-DD');
         }
     } else {
-        // Use current date if no date provided
         targetDate = new Date();
     }
     
@@ -50,10 +46,9 @@ function getDateRanges(period, dateParam) {
 }
 
 const dashboardController = {
-    // Get appointment statistics (confirmed/rejected/total)
     getAppointmentStats: async (req, res) => {
         try {
-            const { period = 'day', date } = req.query; // day, month, or year, date: YYYY-MM-DD
+            const { period = 'day', date } = req.query; 
             
             const { start, end } = getDateRanges(period, date);
             
@@ -92,20 +87,17 @@ const dashboardController = {
         }
     },
 
-    // Get service usage statistics from paid bills
     getServiceUsageStats: async (req, res) => {
         try {
-            const { period = 'day', date } = req.query; // day, month, or year, date: YYYY-MM-DD
+            const { period = 'day', date } = req.query;
             
             const { start, end } = getDateRanges(period, date);
             
-            // Get all paid bills in the period
             const bills = await Bill.find({
                 status: 'Paid',
                 createdAt: { $gte: start, $lte: end }
             }).select('serviceItems');
             
-            // Aggregate service usage
             const serviceMap = new Map();
             
             bills.forEach(bill => {
@@ -129,10 +121,9 @@ const dashboardController = {
                 }
             });
             
-            // Convert to array and sort by quantity
             const serviceUsage = Array.from(serviceMap.values())
                 .sort((a, b) => b.quantity - a.quantity)
-                .slice(0, 10); // Top 10 services
+                .slice(0, 10); 
             
             return res.status(200).json({
                 message: 'Get service usage stats successfully',
@@ -148,14 +139,12 @@ const dashboardController = {
         }
     },
 
-    // Get revenue statistics from paid bills
     getRevenueStats: async (req, res) => {
         try {
-            const { period = 'day', date } = req.query; // day, month, or year, date: YYYY-MM-DD
+            const { period = 'day', date } = req.query; 
             
             const { start, end } = getDateRanges(period, date);
             
-            // Get all paid bills in the period
             const bills = await Bill.find({
                 status: 'Paid',
                 createdAt: { $gte: start, $lte: end }
@@ -164,7 +153,6 @@ const dashboardController = {
             let revenueData = [];
             
             if (period === 'day') {
-                // Group by hour
                 const hourMap = new Map();
                 bills.forEach(bill => {
                     const hour = new Date(bill.createdAt).getHours();
@@ -177,7 +165,6 @@ const dashboardController = {
                     }
                 });
                 
-                // Create array for working hours only (7h - 22h)
                 for (let i = 7; i <= 22; i++) {
                     revenueData.push({
                         label: `${i}:00`,
@@ -185,7 +172,6 @@ const dashboardController = {
                     });
                 }
             } else if (period === 'month') {
-                // Group by day
                 const dayMap = new Map();
                 bills.forEach(bill => {
                     const billDate = new Date(bill.createdAt);
@@ -199,13 +185,12 @@ const dashboardController = {
                     }
                 });
                 
-                // Get number of days in target month - parse date correctly
                 let targetMonth;
                 if (date) {
                     const dateParts = date.split('-');
                     if (dateParts.length === 3) {
                         const year = parseInt(dateParts[0], 10);
-                        const month = parseInt(dateParts[1], 10) - 1; // Month is 0-indexed
+                        const month = parseInt(dateParts[1], 10) - 1; 
                         const day = parseInt(dateParts[2], 10);
                         targetMonth = new Date(year, month, day);
                     } else {
@@ -222,11 +207,10 @@ const dashboardController = {
                     });
                 }
             } else if (period === 'year') {
-                // Group by month
                 const monthMap = new Map();
                 bills.forEach(bill => {
                     const date = new Date(bill.createdAt);
-                    const month = date.getMonth(); // 0-11
+                    const month = date.getMonth(); 
                     const revenue = toNum(bill.finalAmount);
                     
                     if (monthMap.has(month)) {
@@ -262,16 +246,13 @@ const dashboardController = {
         }
     },
 
-    // Get quick metrics for dashboard
     getQuickMetrics: async (req, res) => {
         try {
             const now = new Date();
             
-            // 1. Lịch hẹn hôm nay (ngày hiện tại)
             const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
             
-            // Use date field for appointments (not createdAt)
             const todayAppointments = await Appointment.countDocuments({
                 date: { 
                     $gte: todayStart, 
@@ -279,7 +260,6 @@ const dashboardController = {
                 }
             });
 
-            // 2. Bệnh nhân mới trong tháng (tháng hiện tại)
             const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
             const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
             
@@ -291,7 +271,6 @@ const dashboardController = {
                 }
             });
 
-            // 3. Doanh thu trong tháng (tháng hiện tại)
             const paidBillsThisMonth = await Bill.find({
                 status: 'Paid',
                 createdAt: { 
@@ -304,7 +283,6 @@ const dashboardController = {
                 return sum + toNum(bill.finalAmount);
             }, 0);
 
-            // 4. Đánh giá trung bình (của tất cả đánh giá)
             const allReviews = await Review.find().select('rating');
             let averageRating = 0;
             
