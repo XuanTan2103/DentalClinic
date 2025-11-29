@@ -213,7 +213,7 @@ const Appointment = () => {
       closeRejectModal();
     } catch (error) {
       console.error('Error rejecting appointment:', error);
-      openNotification("error", "Failed to reject appointment." || error.message);
+      openNotification("error",error?.response?.data?.message);
     }
   };
 
@@ -228,7 +228,7 @@ const Appointment = () => {
       openNotification("success", "Appointment deleted successfully.");
     } catch (error) {
       console.error('Error deleting appointment:', error);
-      openNotification("error", "Failed to delete appointment." || error.message);
+      openNotification("error", error?.response?.data?.message || "Failed to delete appointment." );
     }
   };
 

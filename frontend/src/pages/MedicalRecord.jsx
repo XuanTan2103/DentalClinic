@@ -115,7 +115,7 @@ const MedicalRecord = () => {
 
         socket.on('medicalRecordUpdate', (data) => {
             const { medicalRecord, eventType } = data;
-            
+
             if (eventType === 'completed') {
                 setRecords((prev) => {
                     const existingIndex = prev.findIndex(r => r._id === medicalRecord._id);
@@ -206,11 +206,13 @@ const MedicalRecord = () => {
     };
 
     const formatGender = (gender) => {
+        if (!gender) return '';
         const genderMap = {
             male: 'Male',
             female: 'Female',
             other: 'Other',
         };
+
         return genderMap[gender.toLowerCase()] || gender;
     };
 

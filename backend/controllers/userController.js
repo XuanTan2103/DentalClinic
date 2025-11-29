@@ -344,6 +344,65 @@ const userController = {
             res.status(500).json({ message: "Internal server error" });
         }
     },
+
+    updateUserByAdmin: async (req, res) => {
+        try {
+            if (!req.user || req.user.role !== "Admin") {
+                return res.status(403).json({ message: "Only admin can update users" });
+            }
+            const { id } = req.params;
+            const {
+                email,
+                fullName,
+                phoneNumber,
+                gender,
+                dateOfBirth,
+                address
+            } = req.body;
+
+            const user = await User.findById(id);
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+
+            let avatarUrl = user.avatar;
+
+            if (req.file) {
+                const result = await new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream(
+                        { folder: "user_avatars", resource_type: "image" },
+                        (err, result) => (err ? reject(err) : resolve(result))
+                    );
+                    streamifier.createReadStream(req.file.buffer).pipe(stream);
+                });
+
+                avatarUrl = result.secure_url;
+            }
+
+            if (email !== undefined) user.email = email;
+            if (fullName !== undefined) user.fullName = fullName;
+            if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
+            if (gender !== undefined) user.gender = gender;
+            if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth;
+            if (address !== undefined) user.address = address;
+            user.avatar = avatarUrl;
+
+            await user.save();
+
+            const userObj = user.toObject();
+            delete userObj.password;
+
+            res.status(200).json({
+                message: "User updated successfully",
+                user: userObj
+            });
+
+        } catch (error) {
+            console.error("Error updating user by admin:", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    },
+
 }
 
 module.exports = userController;

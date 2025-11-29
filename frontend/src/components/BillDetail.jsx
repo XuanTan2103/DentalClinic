@@ -67,12 +67,6 @@ const BillDetail = ({ isOpen, billId, onClose }) => {
   const serviceItems = useMemo(() => bill?.serviceItems || [], [bill]);
   const medicineItems = useMemo(() => bill?.medicineItems || [], [bill]);
 
-  const handlePrint = () => window.print();
-  const handleDownload = () => {
-    // TODO:
-    alert('Download invoice PDF');
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -259,8 +253,6 @@ const BillDetail = ({ isOpen, billId, onClose }) => {
         </div>
 
         <div className={styles.modalFooter}>
-          <button className={styles.btnSecondary} onClick={handlePrint}>🖨️ Print invoice</button>
-          <button className={styles.btnSecondary} onClick={handleDownload}>📥 Download</button>
           <button className={styles.btnPrimary} onClick={onClose}>Close</button>
         </div>
       </div>
