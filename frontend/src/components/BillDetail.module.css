@@ -299,8 +299,7 @@
   border-radius: 0 0 16px 16px;
 }
 
-.btnPrimary,
-.btnSecondary {
+.btnPrimary{
   padding: 10px 24px;
   border: none;
   border-radius: 8px;
@@ -318,17 +317,6 @@
 .btnPrimary:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.btnSecondary {
-  background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
-}
-
-.btnSecondary:hover {
-  background: #667eea;
-  color: white;
 }
 
 @media (max-width: 768px) {
@@ -351,8 +339,7 @@
     flex-direction: column;
   }
 
-  .btnPrimary,
-  .btnSecondary {
+  .btnPrimary {
     width: 100%;
   }
 }

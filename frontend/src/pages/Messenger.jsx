@@ -14,6 +14,7 @@ const Messenger = () => {
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
   const selectedChatRef = useRef(selectedChat);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const getCurrentUserId = () => {
     try {
@@ -218,6 +219,16 @@ const Messenger = () => {
     }
   }, [selectedChat, fetchMessages, markMessagesAsRead]);
 
+  const filteredContacts = contacts.filter((contact) => {
+    const keyword = searchTerm.toLowerCase();
+
+    if (!keyword) return true;
+
+    const name = (contact.customerName || '').toLowerCase();
+
+    return name.includes(keyword);
+  });
+
   return (
     <div className={styles.messenger}>
       <Sidebar />
@@ -231,12 +242,18 @@ const Messenger = () => {
           <div className={styles.searchContainer}>
             <div className={styles.searchBox}>
               <Search size={16} className={styles.searchIcon} />
-              <input type="text" placeholder="Search" className={styles.searchInput} />
+              <input
+                type="text"
+                placeholder="Search"
+                className={styles.searchInput}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
           </div>
 
           <div className={styles.contactsList}>
-            {contacts.map((contact) => (
+            {filteredContacts.map((contact) => (
               <div
                 key={contact._id}
                 className={`${styles.contactItem} ${String(selectedChat) === String(contact._id) ? styles.contactActive : ''}`}

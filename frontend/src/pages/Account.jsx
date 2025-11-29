@@ -7,9 +7,9 @@ import { notification, Select } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import Swal from "sweetalert2";
 import { LockKeyhole, KeyRound } from 'lucide-react';
-import ConfirmDelete from "../components/ConfirmDelete";
 import CreateUser from "./CreateUser";
 import UserProfile from "../components/UserProfile";
+import EditUser from "../components/EditUser";
 
 
 function Account() {
@@ -23,6 +23,7 @@ function Account() {
     const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState(null);
     const [role, setRole] = useState(null);
+    const [isOpenModalEditUser, setIsOpenModalEditUser] = useState(false);
 
     const token = localStorage.getItem('token');
     useEffect(() => {
@@ -85,12 +86,12 @@ function Account() {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            setUsers(users.filter(user => user._id !== userId));
+            setUsers((prevUsers) => prevUsers.filter(user => user._id !== userId));
             openNotification("success", "User deleted successfully");
         } catch (error) {
             console.error("Error deleting user:", error);
             if (error.response && error.response.data) {
-                if (error.response && error.response.data.errors.length > 0) {
+                if (Array.isArray(error.response.data.errors) && error.response.data.errors.length > 0) {
                     openNotification("error", error.response.data.errors[0].msg);
                 } else if (error.response.data.message) {
                     openNotification("error", error.response.data.message);
@@ -142,6 +143,22 @@ function Account() {
         }
     }
 
+    const handleConfirmDeleteUser = async (user) => {
+        const result = await Swal.fire({
+            title: "Are you sure?",
+            text: `Do you want to delete user ${user.fullName}? This action cannot be undone.`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete",
+        });
+
+        if (result.isConfirmed) {
+            await handleDelete(user._id);
+        }
+    };
+
     useEffect(() => {
         if (!activeDropdown) return;
         const handleClick = (event) => {
@@ -166,8 +183,8 @@ function Account() {
                         <h1 className={styles.title}>User Management</h1>
                         <p className={styles.subtitle}>Manage user accounts and permissions</p>
                     </div>
-                    {!(role === 'Dentist' || role === 'Staff') && 
-                    <button onClick={() => setIsModalCreateOpen(true)} className={styles.addButton}>+ Add user</button>}
+                    {!(role === 'Dentist' || role === 'Staff') &&
+                        <button onClick={() => setIsModalCreateOpen(true)} className={styles.addButton}>+ Add user</button>}
                     <CreateUser isOpen={isModalCreateOpen} onSuccess={() => { fetchUsers() }} onClose={() => setIsModalCreateOpen(false)} openNotification={openNotification} />
                 </div>
 
@@ -321,7 +338,7 @@ function Account() {
                                             </span>
                                         </td>
                                         {!(role === 'Dentist' || role === 'Staff') && (
-                                            <td onClick={(e) => {e.stopPropagation();}}>
+                                            <td onClick={(e) => { e.stopPropagation(); }}>
                                                 <div className={styles.actionContainer} ref={activeDropdown === user._id ? dropdownRef : null}>
                                                     <button
                                                         className={styles.actionButton}
@@ -344,7 +361,7 @@ function Account() {
                                                     </button>
                                                     {activeDropdown === user._id && (
                                                         <div className={styles.dropdown}>
-                                                            <button className={styles.dropdownItem}>
+                                                            <button className={styles.dropdownItem} onClick={() => { setIsOpenModalEditUser(true); setSelectedUserId(user._id); }}>
                                                                 <svg
                                                                     width="14"
                                                                     height="14"
@@ -371,28 +388,23 @@ function Account() {
                                                                     </>
                                                                 )}
                                                             </button>
-                                                            <ConfirmDelete
-                                                                title="Confirm user deletion"
-                                                                description={`Are you sure you want to delete user ${user.fullName}? This action cannot be undone.`}
-                                                                itemName={user.fullName}
-                                                                onConfirm={() => handleDelete(user._id)}>
-                                                                <button
-                                                                    className={`${styles.dropdownItem} ${styles.deleteItem}`}
+                                                            <button
+                                                                className={`${styles.dropdownItem} ${styles.deleteItem}`}
+                                                                onClick={() => handleConfirmDeleteUser(user)}
+                                                            >
+                                                                <svg
+                                                                    width="14"
+                                                                    height="14"
+                                                                    viewBox="0 0 24 24"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    strokeWidth="2"
                                                                 >
-                                                                    <svg
-                                                                        width="14"
-                                                                        height="14"
-                                                                        viewBox="0 0 24 24"
-                                                                        fill="none"
-                                                                        stroke="currentColor"
-                                                                        strokeWidth="2"
-                                                                    >
-                                                                        <polyline points="3,6 5,6 21,6" />
-                                                                        <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6" />
-                                                                    </svg>
-                                                                    Delete
-                                                                </button>
-                                                            </ConfirmDelete>
+                                                                    <polyline points="3,6 5,6 21,6" />
+                                                                    <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6" />
+                                                                </svg>
+                                                                Delete
+                                                            </button>
                                                         </div>
                                                     )}
                                                 </div>
@@ -403,10 +415,11 @@ function Account() {
                             </tbody>
                         </table>
                     </div>
+                    <EditUser isOpen={isOpenModalEditUser} onClose={() => setIsOpenModalEditUser(false)} userId={selectedUserId} onSuccess={() => fetchUsers()} openNotification={openNotification} />
                     <UserProfile isOpen={isModalDetailOpen} onClose={() => setIsModalDetailOpen(false)} userId={selectedUserId} />
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
 

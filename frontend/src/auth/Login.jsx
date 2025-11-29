@@ -21,8 +21,10 @@ function Login() {
       const { token, user } = res.data;
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
-      if (user.role === "Admin" || user.role === "Staff" || user.role === "Dentist") {
+      if (user.role === "Admin" || user.role === "Staff") {
         navigate("/dashboard");
+      } else if (user.role === "Dentist") {
+        navigate("/appointment");
       } else {
         navigate("/home");
       }

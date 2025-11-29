@@ -9,6 +9,7 @@ router.post('/register', validateRegister, userController.register);
 router.post('/create-user', verifyToken, verifyAdmin, validateCreateUser, userController.createUser);
 router.get('/all-users', verifyToken, verifyRole(['Admin', 'Staff', 'Dentist']), userController.getAllUsers);
 router.delete('/delete-user/:id', verifyAdmin, userController.deleteUser);
+router.patch('/update-user/:id', verifyAdmin, validateUpdateProfile, upload.single("avatar"), handleMulterError, userController.updateUserByAdmin);
 router.patch('/toggle-status/:id', verifyAdmin, userController.toggleStatus);
 router.get('/get-user/:id', verifyToken, verifyRole(['Admin', 'Staff', 'Dentist']), userController.getUserById);
 router.get('/profile', verifyToken, userController.getProfile);
